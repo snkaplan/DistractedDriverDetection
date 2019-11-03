@@ -211,18 +211,19 @@ validation_generator = test_datagen.flow_from_directory('../../DataSet/train',
 nb_train_samples = 17943
 nb_validation_samples = 4481
 #
-#checkpoint = ModelCheckpoint('saved_models/weights_best_vgg16.h5', monitor='val_acc', verbose=1, save_best_only=True, mode='max')
+es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=2)
+checkpoint = ModelCheckpoint('../HistoryAndWeightFiles/vgg16_model_weights.h5', monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
 history = model_vgg16.fit_generator(training_generator,
                          steps_per_epoch = nb_train_samples // batch_size,
-                         epochs = epoch, 
-#                         callbacks=[es, checkpoint],
+                         epochs = 1, 
+                         callbacks=[es, checkpoint],
                          verbose = 1,
                          class_weight='auto',
                          validation_data = validation_generator,
                          validation_steps = nb_validation_samples // batch_size)
 
 #%% Model save  
-model_vgg16.save_weights("../HistoryAndWeightFiles/vgg16_model_weights.h5")
+#model_vgg16.save_weights("../HistoryAndWeightFiles/vgg16_model_weights.h5")
 #with open("../HistoryAndWeightFiles/vgg16_model_history.json","w") as f:
 #    json.dump(history.history,f)
     

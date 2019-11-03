@@ -126,7 +126,7 @@ print('Train shape:', x_train.shape)
 print(x_train.shape[0], 'Train Data sample')
 
 #---------Test data---------------
-test_sample_count = 100 #okunacak test veri sayısı
+test_sample_count = 150 #okunacak test veri sayısı
 test_files, test_targets = read_and_normalize_test_data(test_sample_count, img_width, img_height, color_type) #rows_cols resmin boyutunu gönderiyor. color_type ise rgb mi greyscalemi
 print('Test shape:', test_files.shape)
 print(test_files.shape[0], 'Test Data sample') 
@@ -273,7 +273,7 @@ model_vgg19.load_weights('./HistoryAndWeightFiles/vgg19_model_weights.h5')
 #    history = json.loads(f.read())
 
 #%%
-predictImage("CNN ", modelCNN, test_files, 5)
-predictImage("VGG16 ",model_vgg16, test_files, 5) 
-predictImage("VGG19 ",model_vgg19, test_files, 5) 
+predictImage("CNN ", modelCNN, test_files, 1)
+predictImage("VGG16 ",model_vgg16, test_files, 4) 
+predictImage("VGG19 ",model_vgg19, test_files, 2) 
     
