@@ -5,6 +5,7 @@ import os
 from glob import glob
 import random
 import time
+import keras
 import tensorflow
 import datetime
 os.environ['KERAS_BACKEND'] = 'tensorflow'
@@ -14,7 +15,7 @@ from tqdm import tqdm #Progress bar oluşturmak için kullanılmış sadece gör
 import json, codecs
 import numpy as np
 import pandas as pd
-from IPython.display import FileLink
+#from IPython.display import FileLink
 import matplotlib.pyplot as plt
 import warnings
 warnings.filterwarnings('ignore')
@@ -79,7 +80,7 @@ def load_train(img_width, img_height, color_type=3):
 def read_and_normalize_train_data(img_width, img_height, color_type):
     train_images, train_labels = load_train(img_width, img_height, color_type)
     y = np_utils.to_categorical(train_labels, 10)
-    x_train, x_test, y_train, y_test = train_test_split(train_images, y, test_size=0.2, random_state=42)
+    x_train, x_test, y_train, y_test = train_test_split(train_images, y,test_size=0.2, random_state=42)
     
     x_train = np.array(x_train, dtype=np.uint8).reshape(-1,img_width,img_height,color_type)
     x_test = np.array(x_test, dtype=np.uint8).reshape(-1,img_width,img_height,color_type)
@@ -142,7 +143,7 @@ classes      = {'c0': 'Safe driving',
                 'c9': 'Talking to passenger'}
 
 batch_size = 40
-epoch = 100                
+epoch = 1              
 
 
 plt.figure(figsize = (12, 20))
@@ -217,7 +218,7 @@ nb_train_samples = 17943
 nb_validation_samples = 4481
 #
 es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=2)
-checkpoint = ModelCheckpoint('../HistoryAndWeightFiles/vgg16_model_weights.h5', monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
+checkpoint = ModelCheckpoint('../HistoryAndWeightFiles/vgg19_model_weights.h5', monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
 history_vgg19 = model_vgg19.fit_generator(training_generator,
                          steps_per_epoch = nb_train_samples // batch_size,
                          epochs = 62, 
@@ -228,57 +229,57 @@ history_vgg19 = model_vgg19.fit_generator(training_generator,
                          validation_steps = nb_validation_samples // batch_size)
 
 #%% Model save  
-#model_vgg19.save_weights("../HistoryAndWeightFiles/vgg19_model_weights.h5")
-#histt=pd.Series(history_vgg19.history).to_json()
-#with open("../HistoryAndWeightFiles/vgg19_model_history.json","w") as f:  ##modelin accuracy değerlerini jsona yazar
-#    json.dump(histt,f) 
-##%% Load history table and weights
-#model_vgg19.load_weights('../HistoryAndWeightFiles/vgg19_model_weights.h5')
-#
-##with codecs.open("../HistoryAndWeightFiles/vgg19_model_history.json","r",encoding = "utf-8") as f:
-##    history = json.loads(f.read())
-#
-#def plot_train_history(history):
-#    plt.plot(history['accuracy'])
-#    plt.plot(history['val_accuracy'])
-#    plt.title('Model accuracy')
-#    plt.ylabel('accuracy')
-#    plt.xlabel('epoch')
-#    plt.legend(['train', 'test'], loc='upper left')
-#    plt.show()
-#
-#    # Summarize history for loss
-#    plt.plot(history['loss'])
-#    plt.plot(history['val_loss'])
-#    plt.title('Model loss')
-#    plt.ylabel('loss')
-#    plt.xlabel('epoch')
-#    plt.legend(['train', 'test'], loc='upper left')
-#    plt.show()
-##plot_train_history(history)
-#
-##%% prediction
-#def plot_vgg19_test_class(model, test_files, image_number):
-#    cv2.imwrite('../images/testImage.jpg', test_files[image_number])
-#    img_brute = cv2.imread('../images/testImage.jpg',1)
-#
-#    im = cv2.resize(cv2.cvtColor(img_brute, cv2.COLOR_BGR2RGB), (img_width,img_height)).astype(np.float32) / 255.0
-#    im = np.expand_dims(im, axis =0)
-#
-#    img_display = cv2.resize(img_brute,(img_width,img_height))
-#    plt.imshow(img_display, cmap='gray')
-#
-#    y_preds = model.predict(im, batch_size=batch_size, verbose=1)
-#    print(y_preds)
-#    y_prediction = np.argmax(y_preds)
-#    print('Y Prediction: {}'.format(y_prediction))
-#    print('Predicted as: {}'.format(classes.get('c{}'.format(y_prediction))))
-#    
-#    plt.show()
-#    
-#plot_vgg19_test_class(model_vgg19, test_files, 30) # Texting left
-#
-#
-##score = model_vgg19.evaluate_generator(validation_generator, nb_validation_samples // batch_size, verbose = 1)
-##print("Test Score:", score[0])
-##print("Test Accuracy:", score[1])
+model_vgg19.save_weights("../HistoryAndWeightFiles/vgg19_model_weights.h5")
+histt=pd.Series(history_vgg19.history).to_json()
+with open("../HistoryAndWeightFiles/vgg19_model_history.json","w") as f:  ##modelin accuracy değerlerini jsona yazar
+    json.dump(histt,f) 
+#%% Load history table and weights
+model_vgg19.load_weights('../HistoryAndWeightFiles/vgg19_model_weights.h5')
+
+#with codecs.open("../HistoryAndWeightFiles/vgg19_model_history.json","r",encoding = "utf-8") as f:
+#    history = json.loads(f.read())
+
+def plot_train_history(history):
+    plt.plot(history['accuracy'])
+    plt.plot(history['val_accuracy'])
+    plt.title('Model accuracy')
+    plt.ylabel('accuracy')
+    plt.xlabel('epoch')
+    plt.legend(['train', 'test'], loc='upper left')
+    plt.show()
+
+    # Summarize history for loss
+    plt.plot(history['loss'])
+    plt.plot(history['val_loss'])
+    plt.title('Model loss')
+    plt.ylabel('loss')
+    plt.xlabel('epoch')
+    plt.legend(['train', 'test'], loc='upper left')
+    plt.show()
+#plot_train_history(history)
+
+#%% prediction
+def plot_vgg19_test_class(model, test_files, image_number):
+    cv2.imwrite('../images/testImage.jpg', test_files[image_number])
+    img_brute = cv2.imread('../images/testImage.jpg',1)
+
+    im = cv2.resize(cv2.cvtColor(img_brute, cv2.COLOR_BGR2RGB), (img_width,img_height)).astype(np.float32) / 255.0
+    im = np.expand_dims(im, axis =0)
+
+    img_display = cv2.resize(img_brute,(img_width,img_height))
+    plt.imshow(img_display, cmap='gray')
+
+    y_preds = model.predict(im, batch_size=batch_size, verbose=1)
+    print(y_preds)
+    y_prediction = np.argmax(y_preds)
+    print('Y Prediction: {}'.format(y_prediction))
+    print('Predicted as: {}'.format(classes.get('c{}'.format(y_prediction))))
+    
+    plt.show()
+    
+plot_vgg19_test_class(model_vgg19, test_files, 30) # Texting left
+
+
+#score = model_vgg19.evaluate_generator(validation_generator, nb_validation_samples // batch_size, verbose = 1)
+#print("Test Score:", score[0])
+#print("Test Accuracy:", score[1])
