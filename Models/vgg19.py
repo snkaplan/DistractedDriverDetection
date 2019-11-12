@@ -114,8 +114,8 @@ def read_and_normalize_test_data(size, img_width, img_height, color_type=3):
     return test_data, test_ids
 
 
-img_width = 64 #64x64
-img_height = 64
+img_width = 224
+img_height = 224
 color_type = 1 #grey scale
 
 #---------Train data--------------
@@ -176,7 +176,7 @@ def vgg_19_model(img_width, img_height, color_type=3):
     vgg_19_model=VGG19(include_top=False,weights="imagenet",input_shape=(img_width,img_height,color_type)) ## include top false olursa fully connected layerı eklemez
     print(vgg_19_model.summary())
     vgg_layer_list=vgg_19_model.layers
-    print(vgg_layer_list)
+    
     
     model=Sequential()
     
@@ -187,9 +187,12 @@ def vgg_19_model(img_width, img_height, color_type=3):
         layer.trainable=False
     #fully connected layer
     model.add(Flatten())
-    model.add(Dense(1024))
-    model.add(Dense(512))
+    model.add(Dense(1024,activation='relu'))
+    model.add(Dense(512,activation='relu'))
+    model.add(Dropout(0.5))
     model.add(Dense(NumberOfClass,activation="softmax"))
+    
+    print(model.summary())
     
     return model
 
@@ -217,11 +220,11 @@ validation_generator = test_datagen.flow_from_directory('../../DataSet/train',
 nb_train_samples = 17943
 nb_validation_samples = 4481
 #
-es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=2)
+es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=10)
 checkpoint = ModelCheckpoint('../HistoryAndWeightFiles/vgg19_model_weights.h5', monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
 history_vgg19 = model_vgg19.fit_generator(training_generator,
                          steps_per_epoch = nb_train_samples // batch_size,
-                         epochs = 62, 
+                         epochs = 7, 
                          callbacks=[es, checkpoint],
                          verbose = 1,
                          class_weight='auto',
@@ -236,8 +239,8 @@ with open("../HistoryAndWeightFiles/vgg19_model_history.json","w") as f:  ##mode
 #%% Load history table and weights
 model_vgg19.load_weights('../HistoryAndWeightFiles/vgg19_model_weights.h5')
 
-#with codecs.open("../HistoryAndWeightFiles/vgg19_model_history.json","r",encoding = "utf-8") as f:
-#    history = json.loads(f.read())
+with codecs.open("../HistoryAndWeightFiles/vgg19_model_history.json","r",encoding = "utf-8") as f:
+    history = json.loads(f.read())
 
 def plot_train_history(history):
     plt.plot(history['accuracy'])
@@ -256,7 +259,7 @@ def plot_train_history(history):
     plt.xlabel('epoch')
     plt.legend(['train', 'test'], loc='upper left')
     plt.show()
-#plot_train_history(history)
+plot_train_history(history)
 
 #%% prediction
 def plot_vgg19_test_class(model, test_files, image_number):
