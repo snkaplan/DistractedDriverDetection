@@ -23,7 +23,7 @@ from keras.utils import np_utils
 
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
-
+from keras.callbacks import ModelCheckpoint, EarlyStopping
 trainDataSet = pd.read_csv('../csvFiles/driver_imgs_list.csv')
 
 #plt.figure(figsize = (10,10))
@@ -99,9 +99,9 @@ def read_and_normalize_test_data(size, img_width, img_height, color_type=3):
     return test_data, test_ids
 
 
-img_width = 64 #64x64
-img_height = 64
-color_type = 1 #grey scale
+img_width = 224 #64x64
+img_height = 224
+color_type = 3 #grey scale
 
 #---------Train data--------------
 x_train, x_test, y_train, y_test = read_and_normalize_train_data(img_width, img_height, color_type)
@@ -143,7 +143,7 @@ for directory in os.listdir(url): #url içindeki tüm klasörlerde gezecek
                 plt.title(classes[directory]) #başlığına classes içinden kendi grubunu koydu
 #%% MODEL Creation
 batch_size = 40
-epoch = 100                
+epoch = 7                
 
 
 def createModel():
@@ -161,7 +161,6 @@ def createModel():
     model.add(Conv2D(filters = 512, padding='same', kernel_size = 3, activation = 'relu'))
     model.add(MaxPooling2D())
 
-    model.add(Dropout(0.5)) # her seferinde yarı yarı çıkaracak
 
     model.add(Flatten())
 
@@ -173,14 +172,17 @@ def createModel():
 model = createModel()
 
 #layerları gösterir
-#model.summary()
+model.summary()
 #
 ##modeli hazırlar
-model.compile(optimizer='rmsprop', loss='categorical_crossentropy', metrics=['accuracy'])
+es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=2)
+checkpoint = ModelCheckpoint('../HistoryAndWeightFiles/cnn_model_weights.h5', monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
+model.compile(optimizer='rmsprop', loss='categorical_crossentropy',metrics=['accuracy'])
 #
 ##model bir değişkene fit edildi bu değişkenin değerleri kaydedilebilir
 history = model.fit(x_train, y_train, 
                     validation_data=(x_test, y_test),
+                    callbacks=[es,checkpoint],
                     epochs=epoch, batch_size=batch_size, verbose=1)
 
 #%% Model save 
@@ -191,29 +193,29 @@ history = model.fit(x_train, y_train,
 #with open("./HistoryAndWeightFiles/CNN_Model_History3.json","w") as f:  ##modelin accuracy değerlerini jsona yazar
 #    json.dump(histt,f) 
 #%%Model Load
-model.load_weights('../HistoryAndWeightFiles/CNN_Model_Weights.h5') #kayıtlı değişkenleri modele yükler
+#model.load_weights('../HistoryAndWeightFiles/CNN_Model_Weights.h5') #kayıtlı değişkenleri modele yükler
 #
-with codecs.open("../HistoryAndWeightFiles/CNN_Model_History.json","r",encoding = "utf-8") as f: #accuracy ve lost değişkenlerini tekrar yükler
-    oldHistory = json.loads(f.read())
+#with codecs.open("../HistoryAndWeightFiles/CNN_Model_History.json","r",encoding = "utf-8") as f: #accuracy ve lost değişkenlerini tekrar yükler
+#    oldHistory = json.loads(f.read())
 
-def plot_train_history(history):
-    plt.plot(history["accuracy"])
-    plt.plot(history['val_accuracy'])
-    plt.title('Model accuracy')
-    plt.ylabel('accuracy')
-    plt.xlabel('epoch')
-    plt.legend(['train', 'test'], loc='upper left')
-    plt.show()
-
-    # Summarize history for loss
-    plt.plot(history['loss'])
-    plt.plot(history['val_loss'])
-    plt.title('Model loss')
-    plt.ylabel('loss')
-    plt.xlabel('epoch')
-    plt.legend(['train', 'test'], loc='upper left')
-    plt.show()
-plot_train_history(oldHistory)
+#def plot_train_history(history):
+#    plt.plot(history["accuracy"])
+#    plt.plot(history['val_accuracy'])
+#    plt.title('Model accuracy')
+#    plt.ylabel('accuracy')
+#    plt.xlabel('epoch')
+#    plt.legend(['train', 'test'], loc='upper left')
+#    plt.show()
+#
+#    # Summarize history for loss
+#    plt.plot(history['loss'])
+#    plt.plot(history['val_loss'])
+#    plt.title('Model loss')
+#    plt.ylabel('loss')
+#    plt.xlabel('epoch')
+#    plt.legend(['train', 'test'], loc='upper left')
+#    plt.show()
+#plot_train_history(oldHistory)
 #%% Prediction Field
 def predictImage(model, test_files, image_number, color_type=1):
     img = test_files[image_number]
