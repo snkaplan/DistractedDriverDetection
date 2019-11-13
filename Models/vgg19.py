@@ -60,32 +60,32 @@ def get_cv2_image(path, img_width, img_height, color_type=3):
     img = cv2.resize(img, (img_width, img_height)) # resmi model için 64x64 boyutuna indirgiyoruz
     return img
 
-# Train klasöründeki tüm resimleri okuyor
-def load_train(img_width, img_height, color_type=3):
-    start_time = time.time()
-    train_images = [] 
-    train_labels = []
-    # Loop over the training folder 
-    for classed in tqdm(range(NUMBER_CLASSES)):
-        print('Loading directory c{}'.format(classed))
-        files = glob(os.path.join('../', '../','DataSet', 'train', 'c' + str(classed), '*.jpg'))
-        for file in files:
-            img = get_cv2_image(file, img_width, img_height, color_type)
-            train_images.append(img)
-            train_labels.append(classed)
-    print("Data Loaded in {} second".format(time.time() - start_time))
-    return train_images, train_labels 
-
-#Train data yüklemesi yapıyor
-def read_and_normalize_train_data(img_width, img_height, color_type):
-    train_images, train_labels = load_train(img_width, img_height, color_type)
-    y = np_utils.to_categorical(train_labels, 10)
-    x_train, x_test, y_train, y_test = train_test_split(train_images, y,test_size=0.2, random_state=42)
-    
-    x_train = np.array(x_train, dtype=np.uint8).reshape(-1,img_width,img_height,color_type)
-    x_test = np.array(x_test, dtype=np.uint8).reshape(-1,img_width,img_height,color_type)
-    
-    return x_train, x_test, y_train, y_test
+## Train klasöründeki tüm resimleri okuyor
+#def load_train(img_width, img_height, color_type=3):
+#    start_time = time.time()
+#    train_images = [] 
+#    train_labels = []
+#    # Loop over the training folder 
+#    for classed in tqdm(range(NUMBER_CLASSES)):
+#        print('Loading directory c{}'.format(classed))
+#        files = glob(os.path.join('../', '../','DataSet', 'train', 'c' + str(classed), '*.jpg'))
+#        for file in files:
+#            img = get_cv2_image(file, img_width, img_height, color_type)
+#            train_images.append(img)
+#            train_labels.append(classed)
+#    print("Data Loaded in {} second".format(time.time() - start_time))
+#    return train_images, train_labels 
+#
+##Train data yüklemesi yapıyor
+#def read_and_normalize_train_data(img_width, img_height, color_type):
+#    train_images, train_labels = load_train(img_width, img_height, color_type)
+#    y = np_utils.to_categorical(train_labels, 10)
+#    x_train, x_test, y_train, y_test = train_test_split(train_images, y,test_size=0.2, random_state=42)
+#    
+#    x_train = np.array(x_train, dtype=np.uint8).reshape(-1,img_width,img_height,color_type)
+#    x_test = np.array(x_test, dtype=np.uint8).reshape(-1,img_width,img_height,color_type)
+#    
+#    return x_train, x_test, y_train, y_test
 
 # Test klasöründeki tüm resimleri okuyacak
 def load_test(size=200000, img_width=64, img_height=64, color_type=3):
@@ -116,12 +116,12 @@ def read_and_normalize_test_data(size, img_width, img_height, color_type=3):
 
 img_width = 224
 img_height = 224
-color_type = 1 #grey scale
+color_type = 3 #rgb scale
 
 #---------Train data--------------
-x_train, x_test, y_train, y_test = read_and_normalize_train_data(img_width, img_height, color_type)
-print('Train shape:', x_train.shape)
-print(x_train.shape[0], 'Train Data sample')
+#x_train, x_test, y_train, y_test = read_and_normalize_train_data(img_width, img_height, color_type)
+#print('Train shape:', x_train.shape)
+#print(x_train.shape[0], 'Train Data sample')
 
 #---------Test data---------------
 test_sample_count = 100 #okunacak test veri sayısı
@@ -143,7 +143,7 @@ classes      = {'c0': 'Safe driving',
                 'c9': 'Talking to passenger'}
 
 batch_size = 40
-epoch = 1              
+epoch = 7              
 
 
 plt.figure(figsize = (12, 20))
@@ -174,7 +174,6 @@ test_datagen = ImageDataGenerator(rescale=1.0/ 255, validation_split = 0.2)
 def vgg_19_model(img_width, img_height, color_type=3):
     NumberOfClass = 10
     vgg_19_model=VGG19(include_top=False,weights="imagenet",input_shape=(img_width,img_height,color_type)) ## include top false olursa fully connected layerı eklemez
-    print(vgg_19_model.summary())
     vgg_layer_list=vgg_19_model.layers
     
     
@@ -187,13 +186,11 @@ def vgg_19_model(img_width, img_height, color_type=3):
         layer.trainable=False
     #fully connected layer
     model.add(Flatten())
-    model.add(Dense(1024,activation='relu'))
-    model.add(Dense(512,activation='relu'))
+    model.add(Dense(1024))
+    model.add(Dense(512))
     model.add(Dropout(0.5))
     model.add(Dense(NumberOfClass,activation="softmax"))
-    
-    print(model.summary())
-    
+      
     return model
 
 # Load the VGG19 network
@@ -220,14 +217,14 @@ validation_generator = test_datagen.flow_from_directory('../../DataSet/train',
 nb_train_samples = 17943
 nb_validation_samples = 4481
 #
-es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=10)
+es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=2)
 checkpoint = ModelCheckpoint('../HistoryAndWeightFiles/vgg19_model_weights.h5', monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
 history_vgg19 = model_vgg19.fit_generator(training_generator,
                          steps_per_epoch = nb_train_samples // batch_size,
-                         epochs = 7, 
+                         epochs = epoch, 
                          callbacks=[es, checkpoint],
                          verbose = 1,
-                         class_weight='auto',
+                         class_weight='balanced',
                          validation_data = validation_generator,
                          validation_steps = nb_validation_samples // batch_size)
 
@@ -264,7 +261,7 @@ plot_train_history(history)
 #%% prediction
 def plot_vgg19_test_class(model, test_files, image_number):
     cv2.imwrite('../images/testImage.jpg', test_files[image_number])
-    img_brute = cv2.imread('../images/testImage.jpg',1)
+    img_brute = cv2.imread('../images/testImageVGG19.jpg',1)
 
     im = cv2.resize(cv2.cvtColor(img_brute, cv2.COLOR_BGR2RGB), (img_width,img_height)).astype(np.float32) / 255.0
     im = np.expand_dims(im, axis =0)

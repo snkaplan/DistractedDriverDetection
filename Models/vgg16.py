@@ -59,32 +59,32 @@ def get_cv2_image(path, img_width, img_height, color_type=3):
     img = cv2.resize(img, (img_width, img_height)) # resmi model için 64x64 boyutuna indirgiyoruz
     return img
 
-# Train klasöründeki tüm resimleri okuyor
-def load_train(img_width, img_height, color_type=3):
-    start_time = time.time()
-    train_images = [] 
-    train_labels = []
-    # Loop over the training folder 
-    for classed in tqdm(range(NUMBER_CLASSES)):
-        print('Loading directory c{}'.format(classed))
-        files = glob(os.path.join( '../','../','DataSet', 'train', 'c' + str(classed), '*.jpg'))
-        for file in files:
-            img = get_cv2_image(file, img_width, img_height, color_type)
-            train_images.append(img)
-            train_labels.append(classed)
-    print("Data Loaded in {} second".format(time.time() - start_time))
-    return train_images, train_labels 
-
-#Train data yüklemesi yapıyor
-def read_and_normalize_train_data(img_width, img_height, color_type):
-    train_images, train_labels = load_train(img_width, img_height, color_type)
-    y = np_utils.to_categorical(train_labels, 10)
-    x_train, x_test, y_train, y_test = train_test_split(train_images, y, test_size=0.2, random_state=42)
-    
-    x_train = np.array(x_train, dtype=np.uint8).reshape(-1,img_width,img_height,color_type)
-    x_test = np.array(x_test, dtype=np.uint8).reshape(-1,img_width,img_height,color_type)
-    
-    return x_train, x_test, y_train, y_test
+## Train klasöründeki tüm resimleri okuyor
+#def load_train(img_width, img_height, color_type=3):
+#    start_time = time.time()
+#    train_images = [] 
+#    train_labels = []
+#    # Loop over the training folder 
+#    for classed in tqdm(range(NUMBER_CLASSES)):
+#        print('Loading directory c{}'.format(classed))
+#        files = glob(os.path.join( '../','../','DataSet', 'train', 'c' + str(classed), '*.jpg'))
+#        for file in files:
+#            img = get_cv2_image(file, img_width, img_height, color_type)
+#            train_images.append(img)
+#            train_labels.append(classed)
+#    print("Data Loaded in {} second".format(time.time() - start_time))
+#    return train_images, train_labels 
+#
+##Train data yüklemesi yapıyor
+#def read_and_normalize_train_data(img_width, img_height, color_type):
+#    train_images, train_labels = load_train(img_width, img_height, color_type)
+#    y = np_utils.to_categorical(train_labels, 10)
+#    x_train, x_test, y_train, y_test = train_test_split(train_images, y, test_size=0.2, random_state=42)
+#    
+#    x_train = np.array(x_train, dtype=np.uint8).reshape(-1,img_width,img_height,color_type)
+#    x_test = np.array(x_test, dtype=np.uint8).reshape(-1,img_width,img_height,color_type)
+#    
+#    return x_train, x_test, y_train, y_test
 
 # Test klasöründeki tüm resimleri okuyacak
 def load_test(size=200000, img_width=64, img_height=64, color_type=3):
@@ -115,7 +115,7 @@ def read_and_normalize_test_data(size, img_width, img_height, color_type=3):
 
 img_width = 224 #64x64
 img_height = 224
-color_type = 1 #grey scale
+color_type = 3 #rgb scale
 
 #---------Train data--------------
 #x_train, x_test, y_train, y_test = read_and_normalize_train_data(img_width, img_height, color_type)
@@ -142,7 +142,7 @@ classes      = {'c0': 'Safe driving',
                 'c9': 'Talking to passenger'}
 
 batch_size = 40
-epoch = 15                
+epoch = 8                
 
 
 plt.figure(figsize = (12, 20))
@@ -167,14 +167,13 @@ train_datagen = ImageDataGenerator(rescale = 1.0/255,
                                    shear_range = 0.2, 
                                    zoom_range = 0.15, 
                                    horizontal_flip = True, 
-                                   validation_split = 0.15)
+                                   validation_split = 0.2)
 
-test_datagen = ImageDataGenerator(rescale=1.0/ 255, validation_split = 0.15)
+test_datagen = ImageDataGenerator(rescale=1.0/ 255, validation_split = 0.2)
 #%% Model
 def vgg_16_model(img_width, img_height, color_type=3):
     NumberOfClass = 10
     vgg16_model = VGG16(weights="imagenet", include_top=False,  input_shape=(img_width, img_height, color_type))
-    print(vgg16_model.summary())
     
     vgg_layer_list=vgg16_model.layers
     
@@ -187,10 +186,10 @@ def vgg_16_model(img_width, img_height, color_type=3):
         layer.trainable=False
     #fully connected layer
     model.add(Flatten())
+    model.add(Dense(1024))
     model.add(Dense(512))
+    model.add(Dropout(0.5))
     model.add(Dense(NumberOfClass,activation="softmax"))
-    
-    print(model.summary())
     
     return model
 
@@ -218,22 +217,18 @@ validation_generator = test_datagen.flow_from_directory('../../DataSet/train',
 nb_train_samples = 17943
 nb_validation_samples = 4481
 #
-es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=10)
-checkpoint = ModelCheckpoint('../HistoryAndWeightFiles/vgg16_model_weights_2.h5', monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
+es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=2)
+checkpoint = ModelCheckpoint('../HistoryAndWeightFiles/vgg16_model_weights.h5', monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
 history = model_vgg16.fit_generator(training_generator,
                          steps_per_epoch = nb_train_samples // batch_size,
                          epochs = epoch, 
                          callbacks=[es, checkpoint],
                          verbose = 1,
-                         class_weight='auto',
+                         class_weight='balanced',
                          validation_data = validation_generator,
                          validation_steps = nb_validation_samples // batch_size)
 
-#%% Model save  
-#model_vgg16.save_weights("../HistoryAndWeightFiles/vgg16_model_weights.h5")
-#with open("../HistoryAndWeightFiles/vgg16_model_history.json","w") as f:
-#    json.dump(history.history,f)
-    
+#%% Model save      
 histt=pd.Series(history.history).to_json()
 with open("../HistoryAndWeightFiles/vgg16_model_history.json","w") as f:  ##modelin accuracy değerlerini jsona yazar
     json.dump(histt,f) 
