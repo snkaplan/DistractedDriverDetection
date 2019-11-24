@@ -116,17 +116,17 @@ def read_and_normalize_test_data(size, img_width, img_height, color_type=3):
     return test_data, test_ids
 
 
-img_width = 64 #64x64
-img_height = 64
-color_type = 1 #grey scale
+img_width = 224 #64x64
+img_height = 224
+color_type = 3 #grey scale
 
 #---------Train data--------------
-x_train, x_test, y_train, y_test = read_and_normalize_train_data(img_width, img_height, color_type)
-print('Train shape:', x_train.shape)
-print(x_train.shape[0], 'Train Data sample')
+#x_train, x_test, y_train, y_test = read_and_normalize_train_data(img_width, img_height, color_type)
+#print('Train shape:', x_train.shape)
+#print(x_train.shape[0], 'Train Data sample')
 
 #---------Test data---------------
-test_sample_count = 150 #okunacak test veri sayısı
+test_sample_count = 300 #okunacak test veri sayısı
 test_files, test_targets = read_and_normalize_test_data(test_sample_count, img_width, img_height, color_type) #rows_cols resmin boyutunu gönderiyor. color_type ise rgb mi greyscalemi
 print('Test shape:', test_files.shape)
 print(test_files.shape[0], 'Test Data sample') 
@@ -151,7 +151,7 @@ def plot_train_history(history):
     plt.show()
     
 def predictImage(modelName,model, test_files, image_number):
-    if(model==modelCNN):
+    if(model==""):
         img = test_files[image_number]
         img = cv2.resize(img,(img_width,img_height))
         plt.imshow(img, cmap='gray')
@@ -159,7 +159,7 @@ def predictImage(modelName,model, test_files, image_number):
         reshapedImg = img.reshape(-1,img_width,img_height,color_type)
     
         y_prediction = model.predict(reshapedImg, batch_size=batch_size, verbose=1)
-        print(modelName+'Predicted as: {}'.format(classes.get('c{}'.format(np.argmax(y_prediction)))))
+        print('Predicted: {}'.format(classes.get('c{}'.format(np.argmax(y_prediction)))))
         
         plt.show()
     
@@ -182,52 +182,67 @@ def predictImage(modelName,model, test_files, image_number):
         plt.show()
 #%%LOAD CNN MODEL             
 def createModel():
-    model = Sequential() #sıralı model
+    model = Sequential()
 
-    model.add(Conv2D(filters = 64, kernel_size = 3, padding='same', activation = 'relu', input_shape=(img_width, img_height, color_type)))
-    model.add(MaxPooling2D())#default pool_size=2 gelir
+    ## CNN 1
+    model.add(Conv2D(32,(3,3),activation='relu',input_shape=(img_width, img_height, color_type)))
+    model.add(BatchNormalization())
+    model.add(Conv2D(32,(3,3),activation='relu',padding='same'))
+    model.add(BatchNormalization(axis = 3))
+    model.add(MaxPooling2D(pool_size=(2,2),padding='same'))
+    model.add(Dropout(0.3))
 
-    model.add(Conv2D(filters = 128, padding='same', kernel_size = 3, activation = 'relu'))
-    model.add(MaxPooling2D())
+    ## CNN 2
+    model.add(Conv2D(64,(3,3),activation='relu',padding='same'))
+    model.add(BatchNormalization())
+    model.add(Conv2D(64,(3,3),activation='relu',padding='same'))
+    model.add(BatchNormalization(axis = 3))
+    model.add(MaxPooling2D(pool_size=(2,2),padding='same'))
+    model.add(Dropout(0.3))
 
-    model.add(Conv2D(filters = 256, padding='same', kernel_size = 3, activation = 'relu'))
-    model.add(MaxPooling2D()) 
+    ## CNN 3
+    model.add(Conv2D(128,(3,3),activation='relu',padding='same'))
+    model.add(BatchNormalization())
+    model.add(Conv2D(128,(3,3),activation='relu',padding='same'))
+    model.add(BatchNormalization(axis = 3))
+    model.add(MaxPooling2D(pool_size=(2,2),padding='same'))
+    model.add(Dropout(0.5))
 
-    model.add(Conv2D(filters = 512, padding='same', kernel_size = 3, activation = 'relu'))
-    model.add(MaxPooling2D())
-
-    model.add(Dropout(0.5)) # her seferinde yarı yarı çıkaracak
-
+    ## Output
     model.add(Flatten())
 
-    model.add(Dense(500, activation = 'relu'))
-    model.add(Dropout(0.5))
-    model.add(Dense(NUMBER_CLASSES, activation = 'softmax'))
-    
+    model.add(Dense(NUMBER_CLASSES,activation='softmax'))
+
     return model
 modelCNN = createModel()
 
-modelCNN.load_weights('./HistoryAndWeightFiles/CNN_Model_Weights.h5') #kayıtlı değişkenleri modele yükler
+modelCNN.load_weights('./HistoryAndWeightFiles/CNN_model_weights3.h5') #kayıtlı değişkenleri modele yükler
 #
-with codecs.open("./HistoryAndWeightFiles/CNN_Model_History.json","r",encoding = "utf-8") as f: #accuracy ve lost değişkenlerini tekrar yükler
-    oldHistory = json.loads(f.read())
+#with codecs.open("./HistoryAndWeightFiles/CNN_Model_History.json","r",encoding = "utf-8") as f: #accuracy ve lost değişkenlerini tekrar yükler
+#    oldHistory = json.loads(f.read())
     
 
 #plot_train_history(oldHistory)
 #%%Load VGG16 Model  
 def vgg_16_model(img_width, img_height, color_type=3):
     NumberOfClass = 10
-    vgg16_model = VGG16(weights="imagenet", include_top=False)
-
-    for layer in vgg16_model.layers:
-        layer.trainable = False
-     # Creating output layer------------  
-    x = vgg16_model.output
-    x = GlobalAveragePooling2D()(x)
-    x = Dense(1024, activation='relu')(x)    
-    predictions = Dense(NumberOfClass, activation = 'softmax')(x)
-
-    model = Model(input = vgg16_model.input, output = predictions)
+    vgg16_model = VGG16(weights="imagenet", include_top=False,  input_shape=(img_width, img_height, color_type))
+    
+    vgg_layer_list=vgg16_model.layers
+    
+    model=Sequential()
+    
+    for layer in vgg_layer_list:
+        model.add(layer)
+        
+    for layer in model.layers:
+        layer.trainable=False
+    #fully connected layer
+    model.add(Flatten())
+    model.add(Dense(1024))
+    model.add(Dense(512))
+    model.add(Dropout(0.5))
+    model.add(Dense(NumberOfClass,activation="softmax"))
     
     return model
 
@@ -237,10 +252,10 @@ model_vgg16 = vgg_16_model(img_width, img_height)
 
 
 model_vgg16.load_weights('./HistoryAndWeightFiles/vgg16_model_weights.h5')
-
+#
 with codecs.open("./HistoryAndWeightFiles/vgg16_model_history.json","r",encoding = "utf-8") as f:
     oldHistory = json.loads(f.read())
-#plot_train_history(oldHistory)
+plot_train_history(oldHistory)
 #%% VGG19 Model
 def vgg_19_model(img_width, img_height, color_type=3):
     NumberOfClass = 10
@@ -273,7 +288,7 @@ model_vgg19.load_weights('./HistoryAndWeightFiles/vgg19_model_weights.h5')
 #    history = json.loads(f.read())
 
 #%%
-predictImage("CNN ", modelCNN, test_files, 1)
-predictImage("VGG16 ",model_vgg16, test_files, 4) 
-predictImage("VGG19 ",model_vgg19, test_files, 2) 
+predictImage("CNN ", modelCNN, test_files, 15)
+#predictImage("VGG16 ",model_vgg16, test_files, 32) 
+#predictImage("VGG19 ",model_vgg19, test_files, 2) 
     

@@ -113,8 +113,8 @@ def read_and_normalize_test_data(size, img_width, img_height, color_type=3):
     return test_data, test_ids
 
 
-img_width = 224 #64x64
-img_height = 224
+img_width = 100 #64x64
+img_height = 100
 color_type = 3 #rgb scale
 
 #---------Train data--------------
@@ -142,7 +142,7 @@ classes      = {'c0': 'Safe driving',
                 'c9': 'Talking to passenger'}
 
 batch_size = 40
-epoch = 8                
+epoch = 50                
 
 
 plt.figure(figsize = (12, 20))
@@ -186,8 +186,8 @@ def vgg_16_model(img_width, img_height, color_type=3):
         layer.trainable=False
     #fully connected layer
     model.add(Flatten())
-    model.add(Dense(1024))
-    model.add(Dense(512))
+
+    model.add(Dense(128))
     model.add(Dropout(0.5))
     model.add(Dense(NumberOfClass,activation="softmax"))
     
@@ -217,7 +217,7 @@ validation_generator = test_datagen.flow_from_directory('../../DataSet/train',
 nb_train_samples = 17943
 nb_validation_samples = 4481
 #
-es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=2)
+es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=5)
 checkpoint = ModelCheckpoint('../HistoryAndWeightFiles/vgg16_model_weights.h5', monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
 history = model_vgg16.fit_generator(training_generator,
                          steps_per_epoch = nb_train_samples // batch_size,
@@ -260,14 +260,14 @@ plot_train_history(oldHistory)
 
 #%% prediction
 def plot_vgg16_test_class(model, test_files, image_number):
-    cv2.imwrite('../images/testImageVGG16.jpg', test_files[image_number])
-    img_brute = cv2.imread('../images/testImageVGG16.jpg',1)
+    cv2.imwrite('./images/testImage.jpg', test_files[image_number])
+    img_brute = cv2.imread('./images/testImage.jpg',1)
 
     im = cv2.resize(cv2.cvtColor(img_brute, cv2.COLOR_BGR2RGB), (img_width,img_height)).astype(np.float32) / 255.0
     im = np.expand_dims(im, axis =0)
 
     img_display = cv2.resize(img_brute,(img_width,img_height))
-    plt.imshow(img_display, cmap='gray')
+    plt.imshow(img_display)
 
     y_preds = model.predict(im, batch_size=batch_size, verbose=1)
     print(y_preds)
@@ -277,7 +277,7 @@ def plot_vgg16_test_class(model, test_files, image_number):
     
     plt.show()
     
-plot_vgg16_test_class(model_vgg16, test_files,8) # Texting left 80 66 10 8
+plot_vgg16_test_class(model_vgg16, test_files,26) # Texting left 80 66 10 8
 
 
 #score = model_vgg16.evaluate_generator(validation_generator, nb_validation_samples // batch_size, verbose = 1)
