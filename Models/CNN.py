@@ -6,24 +6,24 @@ from glob import glob
 import time
 os.environ['KERAS_BACKEND'] = 'tensorflow'
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' # 3 = INFO, WARNING, and ERROR messages are not printed
-
 from tqdm import tqdm #Progress bar oluşturmak için kullanılmış sadece görüntüsü var. İstersen kullanılan yerlerden kaldırırsın
 import json, codecs
 import numpy as np
 import pandas as pd
-
+from keras.preprocessing.image import ImageDataGenerator
 import matplotlib.pyplot as plt
 import warnings
 warnings.filterwarnings('ignore')
 import matplotlib.image as mpimg
 import cv2
-
 from sklearn.model_selection import train_test_split 
 from keras.utils import np_utils
-
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout,BatchNormalization,Activation
 from keras.callbacks import ModelCheckpoint, EarlyStopping
+from keras.layers import Dense
+from keras.regularizers import l2,l1,l1_l2
+
 trainDataSet = pd.read_csv('../csvFiles/driver_imgs_list.csv')
 
 #plt.figure(figsize = (10,10))
@@ -31,8 +31,6 @@ trainDataSet = pd.read_csv('../csvFiles/driver_imgs_list.csv')
 #plt.ylabel('Count')
 #plt.title('Categories')
 #plt.show()
-
-
 
 #%%
 NUMBER_CLASSES = 10 # toplam 10 tane kesin sınıfımız var
@@ -104,15 +102,23 @@ img_height = 100
 color_type = 3 #grey scale
 
 #---------Train data--------------
-x_train, x_test, y_train, y_test = read_and_normalize_train_data(img_width, img_height, color_type)
-print('Train shape:', x_train.shape)
-print(x_train.shape[0], 'Train Data sample')
+#x_train, x_test, y_train, y_test = read_and_normalize_train_data(img_width, img_height, color_type)
+#print('Train shape:', x_train.shape)
+#print(x_train.shape[0], 'Train Data sample')
 
 #---------Test data---------------
 test_sample_count = 100 #okunacak test veri sayısı
 test_files, test_targets = read_and_normalize_test_data(test_sample_count, img_width, img_height, color_type) #rows_cols resmin boyutunu gönderiyor. color_type ise rgb mi greyscalemi
 print('Test shape:', test_files.shape)
 print(test_files.shape[0], 'Test Data sample') 
+#%%
+train_datagen = ImageDataGenerator(rescale = 1.0/255, 
+                                   shear_range = 0.2, 
+                                   zoom_range = 0.15, 
+                                   horizontal_flip = True, 
+                                   validation_split = 0.2)
+
+test_datagen = ImageDataGenerator(rescale=1.0/ 255, validation_split = 0.2)
 
 #%% Her Gruptan birer örnek çizdirir
 
@@ -148,20 +154,25 @@ epoch = 100
 
 def createModel():
     model=Sequential()
-    model.add(Conv2D(32,(3,3),input_shape=(img_width, img_height, color_type))) #imageler 2D olduğu için Conv da 2D--- 32 tane filtre olacak aynı zamanda 32 feature map
+    model.add(Conv2D(32,(3,3),kernel_regularizer=l2(0.01), bias_regularizer=l2(0.01),input_shape=(img_width, img_height, color_type))) #imageler 2D olduğu için Conv da 2D--- 32 tane filtre olacak aynı zamanda 32 feature map
                                 #imagelerın boyutu 3,3 lük bir matris input_shape başta bulununan resimlerin shapei
     model.add(Activation("relu")) #relu aktivasyon fonksiyonu eklendi
     model.add(MaxPooling2D()) #defaultu 2,2 lik olduğu için bıraktık
     
     
     
-    model.add(Conv2D(32,(3,3),input_shape=(img_width, img_height, color_type))) #imageler 2D olduğu için Conv da 2D--- 32 tane filtre olacak aynı zamanda 32 feature map
+    model.add(Conv2D(32,(3,3),kernel_regularizer=l2(0.01), bias_regularizer=l2(0.01),input_shape=(img_width, img_height, color_type))) #imageler 2D olduğu için Conv da 2D--- 32 tane filtre olacak aynı zamanda 32 feature map
                                 #imagelerın boyutu 3,3 lük bir matris input_shape başta bulununan resimlerin shapei
     model.add(Activation("relu")) #relu aktivasyon fonksiyonu eklendi
     model.add(MaxPooling2D()) #defaultu 2,2 lik olduğu için bıraktık
     
     
-    model.add(Conv2D(64,(3,3),input_shape=(img_width, img_height, color_type))) #imageler 2D olduğu için Conv da 2D--- 32 tane filtre olacak aynı zamanda 32 feature map
+    model.add(Conv2D(64,(3,3),kernel_regularizer=l2(0.01), bias_regularizer=l2(0.01),input_shape=(img_width, img_height, color_type))) #imageler 2D olduğu için Conv da 2D--- 32 tane filtre olacak aynı zamanda 32 feature map
+                                #imagelerın boyutu 3,3 lük bir matris input_shape başta bulununan resimlerin shapei
+    model.add(Activation("relu")) #relu aktivasyon fonksiyonu eklendi
+    model.add(MaxPooling2D()) #defaultu 2,2 lik olduğu için bıraktık
+    
+    model.add(Conv2D(128,(3,3),kernel_regularizer=l2(0.01), bias_regularizer=l2(0.01),input_shape=(img_width, img_height, color_type))) #imageler 2D olduğu için Conv da 2D--- 32 tane filtre olacak aynı zamanda 32 feature map
                                 #imagelerın boyutu 3,3 lük bir matris input_shape başta bulununan resimlerin shapei
     model.add(Activation("relu")) #relu aktivasyon fonksiyonu eklendi
     model.add(MaxPooling2D()) #defaultu 2,2 lik olduğu için bıraktık
@@ -173,7 +184,7 @@ def createModel():
     
     
     model.add(Dense(NUMBER_CLASSES))#output class class sayısı başta bulunan class sayısı olmalı
-    model.add(Dropout(0.5)) #yani her tekrarda nöronların yarısı kapanacak makinenin ezberlemesi önlenecek
+    model.add(Dropout(0.3)) #yani her tekrarda nöronların yarısı kapanacak makinenin ezberlemesi önlenecek
 
     model.add(Activation("softmax")) #en son kullanılan softmax aktivasyonu eklendi
 
@@ -184,15 +195,33 @@ model = createModel()
 model.summary()
 #
 ##modeli hazırlar
-es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=5)
+es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=10)
 checkpoint = ModelCheckpoint('../HistoryAndWeightFiles/CNN_model_weights_v1.h5', monitor='val_loss', verbose=1, save_best_only=True, mode='min')
 model.compile(optimizer='rmsprop', loss='categorical_crossentropy',metrics=['accuracy'])
 #
+training_generator = train_datagen.flow_from_directory('../../DataSet/train', 
+                                                 target_size = (img_width, img_height), 
+                                                 batch_size = batch_size,
+                                                 shuffle=True,
+                                                 class_mode='categorical', subset="training")
+
+validation_generator = test_datagen.flow_from_directory('../../DataSet/train', 
+                                                   target_size = (img_width, img_height), 
+                                                   batch_size = batch_size,
+                                                   shuffle=False,
+                                                   class_mode='categorical', subset="validation")
+
+nb_train_samples = 17943
+nb_validation_samples = 4481
 ##model bir değişkene fit edildi bu değişkenin değerleri kaydedilebilir
-history = model.fit(x_train, y_train, 
-                    validation_data=(x_test, y_test),
-                    callbacks=[checkpoint,es],
-                    epochs=epoch, batch_size=batch_size, verbose=1)
+history = model.fit_generator(training_generator,
+                         steps_per_epoch = nb_train_samples // batch_size,
+                         epochs = epoch, 
+                         callbacks=[es, checkpoint],
+                         verbose = 1,
+                         class_weight='balanced',
+                         validation_data = validation_generator,
+                         validation_steps = nb_validation_samples // batch_size)
 
 #%% Model save 
 #model.save_weights("CNN_Model_Weights.h5") ##modelin weights değişkenlerini kaydeder
@@ -238,4 +267,4 @@ def predictImage(model, test_files, image_number, color_type=3):
     
     plt.show()
     
-predictImage(model, test_files,25)
+predictImage(model, test_files,34)
