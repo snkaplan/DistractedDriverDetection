@@ -36,6 +36,8 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras.preprocessing import image
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.applications.vgg16 import VGG16
+from keras import regularizers
+from keras.optimizers import SGD
 
 trainDataSet = pd.read_csv('../csvFiles/driver_imgs_list.csv')
 
@@ -172,24 +174,29 @@ train_datagen = ImageDataGenerator(rescale = 1.0/255,
 test_datagen = ImageDataGenerator(rescale=1.0/ 255, validation_split = 0.2)
 #%% Model
 def vgg_16_model(img_width, img_height, color_type=3):
-    NumberOfClass = 10
-    vgg16_model = VGG16(weights="imagenet", include_top=False,  input_shape=(img_width, img_height, color_type))
+    # create the base pre-trained model
+    base_model = VGG16(weights='imagenet', include_top=False, input_shape=(img_width, img_height, color_type))
+    for layer in enumerate(base_model.layers):
+        layer[1].trainable = False
     
-    vgg_layer_list=vgg16_model.layers
+    #flatten the results from conv block
+    x = Flatten()(base_model.output)
     
-    model=Sequential()
+    #add another fully connected layers with batch norm and dropout
+    x = Dense(4096, activation='relu')(x)
+    x = BatchNormalization()(x)
+    x = Dropout(0.5)(x)
     
-    for layer in vgg_layer_list:
-        model.add(layer)
-        
-    for layer in model.layers:
-        layer.trainable=False
-    #fully connected layer
-    model.add(Flatten())
+    #add another fully connected layers with batch norm and dropout
+    x = Dense(4096, activation='relu')(x)
+    x = BatchNormalization()(x)
+    x = Dropout(0.5)(x)
 
-    model.add(Dense(128))
-    model.add(Dropout(0.5))
-    model.add(Dense(NumberOfClass,activation="softmax"))
+    #add logistic layer with all car classes
+    predictions = Dense(len(classes), activation='softmax', kernel_initializer='random_uniform', bias_initializer='random_uniform', bias_regularizer=regularizers.l2(0.01), name='predictions')(x)
+    
+    # this is the model we will train
+    model = Model(inputs=base_model.input, outputs=predictions)
     
     return model
 
@@ -199,9 +206,6 @@ model_vgg16 = vgg_16_model(img_width, img_height)
 
 model_vgg16.summary()
 
-model_vgg16.compile(loss='categorical_crossentropy',
-                         optimizer='rmsprop',
-                         metrics=['accuracy'])
 
 training_generator = train_datagen.flow_from_directory('../../DataSet/train', 
                                                  target_size = (img_width, img_height), 
@@ -216,28 +220,50 @@ validation_generator = test_datagen.flow_from_directory('../../DataSet/train',
                                                    class_mode='categorical', subset="validation")
 nb_train_samples = 17943
 nb_validation_samples = 4481
-#
+
+
+
+sgd = SGD(lr=0.01, momentum=0.9, decay=0.01, nesterov=True)
+model_vgg16.compile(optimizer=sgd, loss='categorical_crossentropy', metrics=['accuracy'])
 es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=5)
-checkpoint = ModelCheckpoint('../HistoryAndWeightFiles/vgg16_model_weights.h5', monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
-history = model_vgg16.fit_generator(training_generator,
-                         steps_per_epoch = nb_train_samples // batch_size,
-                         epochs = epoch, 
-                         callbacks=[es, checkpoint],
-                         verbose = 1,
-                         class_weight='balanced',
-                         validation_data = validation_generator,
-                         validation_steps = nb_validation_samples // batch_size)
+checkpoint = ModelCheckpoint('../HistoryAndWeightFiles/vgg16_model_weights_v2.h5', monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
+# we train our model again (this time fine-tuning the top 2 inception blocks
+# alongside the top Dense layers
+history = model_vgg16.fit_generator(
+    training_generator, 
+    steps_per_epoch=nb_train_samples // batch_size, 
+    epochs=epoch, 
+    validation_data=validation_generator, 
+    validation_steps=nb_validation_samples // batch_size,
+    callbacks=[es, checkpoint],
+    verbose=1)
+
+#plt.clf()
+#plt.plot(history.history['val_acc'], 'r')
+#plt.plot(history.history['acc'], 'b')
+#plt.savefig(savedModelName + '_finalModel_plot.png')
+#serializeModel(model, savedModelName + "_finalModel")
+##
+#
+#history = model_vgg16.fit_generator(training_generator,
+#                         steps_per_epoch = nb_train_samples // batch_size,
+#                         epochs = epoch, 
+#                         callbacks=[es, checkpoint],
+#                         verbose = 1,
+#                         class_weight='balanced',
+#                         validation_data = validation_generator,
+#                         validation_steps = nb_validation_samples // batch_size)
 
 #%% Model save      
 histt=pd.Series(history.history).to_json()
-with open("../HistoryAndWeightFiles/vgg16_model_history.json","w") as f:  ##modelin accuracy değerlerini jsona yazar
+with open("../HistoryAndWeightFiles/vgg16_model_history_v2.json","w") as f:  ##modelin accuracy değerlerini jsona yazar
     json.dump(histt,f) 
 
 
 #%% Load history and wights
 #model_vgg16.load_weights('../HistoryAndWeightFiles/vgg16_model_weights.h5')
 #
-with codecs.open("../HistoryAndWeightFiles/vgg16_model_history.json","r",encoding = "utf-8") as f:
+with codecs.open("../HistoryAndWeightFiles/vgg16_model_history_V2.json","r",encoding = "utf-8") as f:
     oldHistory = json.loads(f.read())
 def plot_train_history(history):
     plt.plot(history['accuracy'])

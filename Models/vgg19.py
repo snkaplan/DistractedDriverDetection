@@ -37,6 +37,8 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras.preprocessing import image
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.applications.vgg19 import VGG19
+from keras import regularizers
+from keras.optimizers import SGD
 
 trainDataSet = pd.read_csv('../csvFiles/driver_imgs_list.csv')
 
@@ -143,7 +145,7 @@ classes      = {'c0': 'Safe driving',
                 'c9': 'Talking to passenger'}
 
 batch_size = 40
-epoch = 7              
+epoch = 50              
 
 
 plt.figure(figsize = (12, 20))
@@ -172,36 +174,39 @@ train_datagen = ImageDataGenerator(rescale = 1.0/255,
 test_datagen = ImageDataGenerator(rescale=1.0/ 255, validation_split = 0.2)
 #%% Model
 def vgg_19_model(img_width, img_height, color_type=3):
-    NumberOfClass = 10
-    vgg_19_model=VGG19(include_top=False,weights="imagenet",input_shape=(img_width,img_height,color_type)) ## include top false olursa fully connected layerı eklemez
-    vgg_layer_list=vgg_19_model.layers
+    # create the base pre-trained model
+    base_model = VGG19(weights='imagenet', include_top=False, input_shape=(img_width, img_height, color_type))
+    for layer in enumerate(base_model.layers):
+        layer[1].trainable = False
     
+    #flatten the results from conv block
+    x = Flatten()(base_model.output)
     
-    model=Sequential()
+    #add another fully connected layers with batch norm and dropout
+    x = Dense(4096, activation='relu')(x)
+    x = BatchNormalization()(x)
+    x = Dropout(0.5)(x)
     
-    for layer in vgg_layer_list:
-        model.add(layer)
-        
-    for layer in model.layers:
-        layer.trainable=False
-    #fully connected layer
-    model.add(Flatten())
-    model.add(Dense(1024))
-    model.add(Dense(512))
-    model.add(Dropout(0.5))
-    model.add(Dense(NumberOfClass,activation="softmax"))
-      
+    #add another fully connected layers with batch norm and dropout
+    x = Dense(4096, activation='relu')(x)
+    x = BatchNormalization()(x)
+    x = Dropout(0.5)(x)
+
+
+    #add logistic layer with all car classes
+    predictions = Dense(len(classes), activation='softmax', kernel_initializer='random_uniform', bias_initializer='random_uniform', bias_regularizer=regularizers.l2(0.01), name='predictions')(x)
+    
+    # this is the model we will train
+    model = Model(inputs=base_model.input, outputs=predictions)
+    
     return model
 
-# Load the VGG19 network
-print("Loading Model")
+# Load the VGG16 network
+print("Loading Model...")
 model_vgg19 = vgg_19_model(img_width, img_height)
 
 model_vgg19.summary()
 
-model_vgg19.compile(loss='categorical_crossentropy',
-                         optimizer='rmsprop',
-                         metrics=['accuracy'])
 
 training_generator = train_datagen.flow_from_directory('../../DataSet/train', 
                                                  target_size = (img_width, img_height), 
@@ -216,9 +221,20 @@ validation_generator = test_datagen.flow_from_directory('../../DataSet/train',
                                                    class_mode='categorical', subset="validation")
 nb_train_samples = 17943
 nb_validation_samples = 4481
+
+
+
+sgd = SGD(lr=0.01, momentum=0.9, decay=0.01, nesterov=True)
+
+model_vgg19.compile(loss='categorical_crossentropy',
+                         optimizer=sgd,
+                         metrics=['accuracy'])
+
+nb_train_samples = 17943
+nb_validation_samples = 4481
 #
-es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=2)
-checkpoint = ModelCheckpoint('../HistoryAndWeightFiles/vgg19_model_weights.h5', monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
+es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=5)
+checkpoint = ModelCheckpoint('../HistoryAndWeightFiles/vgg19_model_weights_v2.h5', monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
 history_vgg19 = model_vgg19.fit_generator(training_generator,
                          steps_per_epoch = nb_train_samples // batch_size,
                          epochs = epoch, 
@@ -229,34 +245,34 @@ history_vgg19 = model_vgg19.fit_generator(training_generator,
                          validation_steps = nb_validation_samples // batch_size)
 
 #%% Model save  
-model_vgg19.save_weights("../HistoryAndWeightFiles/vgg19_model_weights.h5")
+#model_vgg19.save_weights("../HistoryAndWeightFiles/vgg19_model_weights.h5")
 histt=pd.Series(history_vgg19.history).to_json()
-with open("../HistoryAndWeightFiles/vgg19_model_history.json","w") as f:  ##modelin accuracy değerlerini jsona yazar
+with open("../HistoryAndWeightFiles/vgg19_model_history_v2.json","w") as f:  ##modelin accuracy değerlerini jsona yazar
     json.dump(histt,f) 
 #%% Load history table and weights
-model_vgg19.load_weights('../HistoryAndWeightFiles/vgg19_model_weights.h5')
+#model_vgg19.load_weights('../HistoryAndWeightFiles/vgg19_model_weights.h5')
 
-with codecs.open("../HistoryAndWeightFiles/vgg19_model_history.json","r",encoding = "utf-8") as f:
-    history = json.loads(f.read())
+#with codecs.open("../HistoryAndWeightFiles/vgg19_model_history.json","r",encoding = "utf-8") as f:
+#    history = json.loads(f.read())
 
-def plot_train_history(history):
-    plt.plot(history['accuracy'])
-    plt.plot(history['val_accuracy'])
-    plt.title('Model accuracy')
-    plt.ylabel('accuracy')
-    plt.xlabel('epoch')
-    plt.legend(['train', 'test'], loc='upper left')
-    plt.show()
-
-    # Summarize history for loss
-    plt.plot(history['loss'])
-    plt.plot(history['val_loss'])
-    plt.title('Model loss')
-    plt.ylabel('loss')
-    plt.xlabel('epoch')
-    plt.legend(['train', 'test'], loc='upper left')
-    plt.show()
-plot_train_history(history)
+#def plot_train_history(history):
+#    plt.plot(history['accuracy'])
+#    plt.plot(history['val_accuracy'])
+#    plt.title('Model accuracy')
+#    plt.ylabel('accuracy')
+#    plt.xlabel('epoch')
+#    plt.legend(['train', 'test'], loc='upper left')
+#    plt.show()
+#
+#    # Summarize history for loss
+#    plt.plot(history['loss'])
+#    plt.plot(history['val_loss'])
+#    plt.title('Model loss')
+#    plt.ylabel('loss')
+#    plt.xlabel('epoch')
+#    plt.legend(['train', 'test'], loc='upper left')
+#    plt.show()
+#plot_train_history(history)
 
 #%% prediction
 def plot_vgg19_test_class(model, test_files, image_number):
