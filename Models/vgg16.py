@@ -5,11 +5,14 @@ import os
 from glob import glob
 import random
 import time
-import tensorflow
+
 import datetime
 os.environ['KERAS_BACKEND'] = 'tensorflow'
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' # 3 = INFO, WARNING, and ERROR messages are not printed
+import tensorflow as tf
 
+sess = tf.compat.v1.Session() 
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 from tqdm import tqdm #Progress bar oluşturmak için kullanılmış sadece görüntüsü hoş
 import json, codecs
 import numpy as np
@@ -115,8 +118,8 @@ def read_and_normalize_test_data(size, img_width, img_height, color_type=3):
     return test_data, test_ids
 
 
-img_width = 100 #64x64
-img_height = 100
+img_width = 150 #64x64
+img_height = 150
 color_type = 3 #rgb scale
 
 #---------Train data--------------
@@ -143,24 +146,24 @@ classes      = {'c0': 'Safe driving',
                 'c8': 'Hair and makeup', 
                 'c9': 'Talking to passenger'}
 
-batch_size = 40
-epoch = 50                
+batch_size = 100
+epoch = 200                
 
 
-plt.figure(figsize = (12, 20))
-image_count = 1
-url = '../../DataSet/train/'
-for directory in os.listdir(url): #url içindeki tüm klasörlerde gezecek
-    if directory[0] != '.':
-        for i, file in enumerate(os.listdir(url + directory)):
-            if i == 1:
-                break
-            else:
-                fig = plt.subplot(5, 2, image_count)
-                image_count += 1
-                images = mpimg.imread(url + directory + '/' + file) #mpimg matplotlib içinde image göstermeye yarayan kütüphane
-                plt.imshow(images) #images değişkenini çizdi
-                plt.title(classes[directory]) #başlığına classes içinden kendi grubunu koydu
+#plt.figure(figsize = (12, 20))
+#image_count = 1
+#url = '../../DataSet/train/'
+#for directory in os.listdir(url): #url içindeki tüm klasörlerde gezecek
+#    if directory[0] != '.':
+#        for i, file in enumerate(os.listdir(url + directory)):
+#            if i == 1:
+#                break
+#            else:
+#                fig = plt.subplot(5, 2, image_count)
+#                image_count += 1
+#                images = mpimg.imread(url + directory + '/' + file) #mpimg matplotlib içinde image göstermeye yarayan kütüphane
+#                plt.imshow(images) #images değişkenini çizdi
+#                plt.title(classes[directory]) #başlığına classes içinden kendi grubunu koydu
 
 #%% VGG16----
 #%%Data Generator-------------
@@ -173,6 +176,7 @@ train_datagen = ImageDataGenerator(rescale = 1.0/255,
 
 test_datagen = ImageDataGenerator(rescale=1.0/ 255, validation_split = 0.2)
 #%% Model
+base_model = VGG16(weights='imagenet', include_top=False, input_shape=(img_width, img_height, color_type))
 def vgg_16_model(img_width, img_height, color_type=3):
     # create the base pre-trained model
     base_model = VGG16(weights='imagenet', include_top=False, input_shape=(img_width, img_height, color_type))
@@ -187,10 +191,13 @@ def vgg_16_model(img_width, img_height, color_type=3):
     x = BatchNormalization()(x)
     x = Dropout(0.5)(x)
     
-    #add another fully connected layers with batch norm and dropout
     x = Dense(4096, activation='relu')(x)
     x = BatchNormalization()(x)
     x = Dropout(0.5)(x)
+    
+    
+    
+    
 
     #add logistic layer with all car classes
     predictions = Dense(len(classes), activation='softmax', kernel_initializer='random_uniform', bias_initializer='random_uniform', bias_regularizer=regularizers.l2(0.01), name='predictions')(x)
@@ -223,10 +230,10 @@ nb_validation_samples = 4481
 
 
 
-sgd = SGD(lr=0.01, momentum=0.9, decay=0.01, nesterov=True)
+sgd = SGD(lr=0.0001, momentum=0.9, decay=0.01, nesterov=True)
 model_vgg16.compile(optimizer=sgd, loss='categorical_crossentropy', metrics=['accuracy'])
 es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=5)
-checkpoint = ModelCheckpoint('../HistoryAndWeightFiles/vgg16_model_weights_v2.h5', monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
+checkpoint = ModelCheckpoint('../HistoryAndWeightFiles/vgg16_model_weights.h5', monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
 # we train our model again (this time fine-tuning the top 2 inception blocks
 # alongside the top Dense layers
 history = model_vgg16.fit_generator(
@@ -255,34 +262,34 @@ history = model_vgg16.fit_generator(
 #                         validation_steps = nb_validation_samples // batch_size)
 
 #%% Model save      
+#model_vgg16.save_weights("../HistoryAndWeightFiles/vgg16_model_history.h5") ##modelin weights değişkenlerini kaydeder
 histt=pd.Series(history.history).to_json()
-with open("../HistoryAndWeightFiles/vgg16_model_history_v2.json","w") as f:  ##modelin accuracy değerlerini jsona yazar
+with open("../HistoryAndWeightFiles/vgg16_model_history.json","w") as f:  ##modelin accuracy değerlerini jsona yazar
     json.dump(histt,f) 
 
 
 #%% Load history and wights
-#model_vgg16.load_weights('../HistoryAndWeightFiles/vgg16_model_weights.h5')
+#model_vgg16.load_weights("C:\DistractedDriverDetection\DistractedDriverDetection\HistoryAndWeightFiles\x.h5")
+#with codecs.open("../HistoryAndWeightFiles/vgg16_model_history_V2.json","r",encoding = "utf-8") as f:
+#    oldHistory = json.loads(f.read())
+#def plot_train_history(history):
+#    plt.plot(history['accuracy'])
+#    plt.plot(history['val_accuracy'])
+#    plt.title('Model accuracy')
+#    plt.ylabel('accuracy')
+#    plt.xlabel('epoch')
+#    plt.legend(['train', 'test'], loc='upper left')
+#    plt.show()
 #
-with codecs.open("../HistoryAndWeightFiles/vgg16_model_history_V2.json","r",encoding = "utf-8") as f:
-    oldHistory = json.loads(f.read())
-def plot_train_history(history):
-    plt.plot(history['accuracy'])
-    plt.plot(history['val_accuracy'])
-    plt.title('Model accuracy')
-    plt.ylabel('accuracy')
-    plt.xlabel('epoch')
-    plt.legend(['train', 'test'], loc='upper left')
-    plt.show()
-
-    # Summarize history for loss
-    plt.plot(history['loss'])
-    plt.plot(history['val_loss'])
-    plt.title('Model loss')
-    plt.ylabel('loss')
-    plt.xlabel('epoch')
-    plt.legend(['train', 'test'], loc='upper left')
-    plt.show()
-plot_train_history(oldHistory)
+#    # Summarize history for loss
+#    plt.plot(history['loss'])
+#    plt.plot(history['val_loss'])
+#    plt.title('Model loss')
+#    plt.ylabel('loss')
+#    plt.xlabel('epoch')
+#    plt.legend(['train', 'test'], loc='upper left')
+#    plt.show()
+#plot_train_history(oldHistory)
 
 #%% prediction
 def plot_vgg16_test_class(model, test_files, image_number):
@@ -303,7 +310,7 @@ def plot_vgg16_test_class(model, test_files, image_number):
     
     plt.show()
     
-plot_vgg16_test_class(model_vgg16, test_files,26) # Texting left 80 66 10 8
+plot_vgg16_test_class(model_vgg16, test_files,5) # Texting left 80 66 10 8
 
 
 #score = model_vgg16.evaluate_generator(validation_generator, nb_validation_samples // batch_size, verbose = 1)

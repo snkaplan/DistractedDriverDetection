@@ -245,7 +245,7 @@ history_vgg19 = model_vgg19.fit_generator(training_generator,
                          validation_steps = nb_validation_samples // batch_size)
 
 #%% Model save  
-#model_vgg19.save_weights("../HistoryAndWeightFiles/vgg19_model_weights.h5")
+model_vgg19.save_weights("../HistoryAndWeightFiles/vgg19_model_weights_v3.h5")
 histt=pd.Series(history_vgg19.history).to_json()
 with open("../HistoryAndWeightFiles/vgg19_model_history_v2.json","w") as f:  ##modelin accuracy değerlerini jsona yazar
     json.dump(histt,f) 
