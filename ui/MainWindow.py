@@ -9,7 +9,8 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import (QAction, QFileDialog)
-
+from .. import main
+model = main.Model()
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -34,6 +35,7 @@ class Ui_MainWindow(object):
         self.analyzeButton = QtWidgets.QPushButton(self.centralwidget)
         self.analyzeButton.setGeometry(QtCore.QRect(90, 300, 211, 41))
         self.analyzeButton.setObjectName("analyzeButton")
+        self.analyzeButton.clicked.connect(self.analyze)
         self.graphicsView = QtWidgets.QGraphicsView(self.centralwidget)
         self.graphicsView.setGeometry(QtCore.QRect(450, 300, 331, 251))
         self.graphicsView.setObjectName("graphicsView")
@@ -67,3 +69,7 @@ class Ui_MainWindow(object):
         dir_name = QFileDialog.getExistingDirectory(self, 'Select Directory')
         self.filePathLabel.setText( dir_name)
         print(dir_name)
+    
+    def analyze(self):
+        prediction=model.analyze(self.filePathLabel.text())
+        self.imageResultLabel.setText(prediction)
