@@ -32,12 +32,15 @@ from sklearn.utils import shuffle
 from sklearn.metrics import log_loss
 
 from keras.models import Sequential, Model
-from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout, BatchNormalization, GlobalAveragePooling2D
+from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout, BatchNormalization, GlobalAveragePooling2D,Activation
 from keras.preprocessing.image import ImageDataGenerator
 from keras.preprocessing import image
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.applications.vgg19 import VGG19
 from keras.applications.vgg16 import VGG16
+
+from keras import regularizers
+from keras.optimizers import SGD
 #%% LOAD IMAGES
 
 classes      = {'c0': 'Safe driving', 
@@ -116,8 +119,8 @@ def read_and_normalize_test_data(size, img_width, img_height, color_type=3):
     return test_data, test_ids
 
 
-img_width = 224 #64x64
-img_height = 224
+img_width = 120 #64x64
+img_height = 120
 color_type = 3 #grey scale
 
 #---------Train data--------------
@@ -151,12 +154,12 @@ def plot_train_history(history):
     plt.show()
     
 def predictImage(modelName,model, test_files, image_number):
-    if(model==""):
+    if(modelName=="CNN"):
         img = test_files[image_number]
-        img = cv2.resize(img,(img_width,img_height))
+        img = cv2.resize(img,(64,64))
         plt.imshow(img, cmap='gray')
     
-        reshapedImg = img.reshape(-1,img_width,img_height,color_type)
+        reshapedImg = img.reshape(-1,64,64,1)
     
         y_prediction = model.predict(reshapedImg, batch_size=batch_size, verbose=1)
         print('Predicted: {}'.format(classes.get('c{}'.format(np.argmax(y_prediction)))))
@@ -182,41 +185,32 @@ def predictImage(modelName,model, test_files, image_number):
         plt.show()
 #%%LOAD CNN MODEL             
 def createModel():
-    model = Sequential()
+    model = Sequential() #sıralı model
 
-    ## CNN 1
-    model.add(Conv2D(32,(3,3),activation='relu',input_shape=(img_width, img_height, color_type)))
-    model.add(BatchNormalization())
-    model.add(Conv2D(32,(3,3),activation='relu',padding='same'))
-    model.add(BatchNormalization(axis = 3))
-    model.add(MaxPooling2D(pool_size=(2,2),padding='same'))
-    model.add(Dropout(0.3))
+    model.add(Conv2D(filters = 64, kernel_size = 3, padding='same', activation = 'relu', input_shape=(64, 64, 1)))
+    model.add(MaxPooling2D())#default pool_size=2 gelir
 
-    ## CNN 2
-    model.add(Conv2D(64,(3,3),activation='relu',padding='same'))
-    model.add(BatchNormalization())
-    model.add(Conv2D(64,(3,3),activation='relu',padding='same'))
-    model.add(BatchNormalization(axis = 3))
-    model.add(MaxPooling2D(pool_size=(2,2),padding='same'))
-    model.add(Dropout(0.3))
+    model.add(Conv2D(filters = 128, padding='same', kernel_size = 3, activation = 'relu'))
+    model.add(MaxPooling2D())
 
-    ## CNN 3
-    model.add(Conv2D(128,(3,3),activation='relu',padding='same'))
-    model.add(BatchNormalization())
-    model.add(Conv2D(128,(3,3),activation='relu',padding='same'))
-    model.add(BatchNormalization(axis = 3))
-    model.add(MaxPooling2D(pool_size=(2,2),padding='same'))
-    model.add(Dropout(0.5))
+    model.add(Conv2D(filters = 256, padding='same', kernel_size = 3, activation = 'relu'))
+    model.add(MaxPooling2D()) 
 
-    ## Output
+    model.add(Conv2D(filters = 512, padding='same', kernel_size = 3, activation = 'relu'))
+    model.add(MaxPooling2D())
+
+    model.add(Dropout(0.5)) # her seferinde yarı yarı çıkaracak
+
     model.add(Flatten())
 
-    model.add(Dense(NUMBER_CLASSES,activation='softmax'))
-
+    model.add(Dense(500, activation = 'relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(NUMBER_CLASSES, activation = 'softmax'))
+    
     return model
 modelCNN = createModel()
 
-modelCNN.load_weights('./HistoryAndWeightFiles/CNN_model_weights3.h5') #kayıtlı değişkenleri modele yükler
+modelCNN.load_weights('./HistoryAndWeightFiles/CNN_Model_Weights.h5') #kayıtlı değişkenleri modele yükler
 #
 #with codecs.open("./HistoryAndWeightFiles/CNN_Model_History.json","r",encoding = "utf-8") as f: #accuracy ve lost değişkenlerini tekrar yükler
 #    oldHistory = json.loads(f.read())
@@ -224,25 +218,33 @@ modelCNN.load_weights('./HistoryAndWeightFiles/CNN_model_weights3.h5') #kayıtl�
 
 #plot_train_history(oldHistory)
 #%%Load VGG16 Model  
+#vgg16 v2 2x(4096) lık dense layera sahip. O esnadaki en iyi ağırlıklara sahip.
 def vgg_16_model(img_width, img_height, color_type=3):
-    NumberOfClass = 10
-    vgg16_model = VGG16(weights="imagenet", include_top=False,  input_shape=(img_width, img_height, color_type))
+    # create the base pre-trained model
+    base_model = VGG16(weights='imagenet', include_top=False, input_shape=(img_width, img_height, color_type))
+    for layer in enumerate(base_model.layers):
+        layer[1].trainable = False
     
-    vgg_layer_list=vgg16_model.layers
+    #flatten the results from conv block
+    x = Flatten()(base_model.output)
     
-    model=Sequential()
+    #add another fully connected layers with batch norm and dropout
+    x = Dense(4096, activation='relu')(x)
+    x = BatchNormalization()(x)
+    x = Dropout(0.5)(x)
     
-    for layer in vgg_layer_list:
-        model.add(layer)
-        
-    for layer in model.layers:
-        layer.trainable=False
-    #fully connected layer
-    model.add(Flatten())
-    model.add(Dense(1024))
-    model.add(Dense(512))
-    model.add(Dropout(0.5))
-    model.add(Dense(NumberOfClass,activation="softmax"))
+    x = Dense(4096, activation='relu')(x)
+    x = BatchNormalization()(x)
+    x = Dropout(0.5)(x)
+
+    
+    
+
+    #add logistic layer with all car classes
+    predictions = Dense(len(classes), activation='softmax', kernel_initializer='random_uniform', bias_initializer='random_uniform', bias_regularizer=regularizers.l2(0.01), name='predictions')(x)
+    
+    # this is the model we will train
+    model = Model(inputs=base_model.input, outputs=predictions)
     
     return model
 
@@ -253,28 +255,36 @@ model_vgg16 = vgg_16_model(img_width, img_height)
 
 model_vgg16.load_weights('./HistoryAndWeightFiles/vgg16_model_weights.h5')
 #
-with codecs.open("./HistoryAndWeightFiles/vgg16_model_history.json","r",encoding = "utf-8") as f:
-    oldHistory = json.loads(f.read())
-plot_train_history(oldHistory)
+#with codecs.open("./HistoryAndWeightFiles/vgg16_model_history.json","r",encoding = "utf-8") as f:
+#    oldHistory = json.loads(f.read())
+#plot_train_history(oldHistory)
 #%% VGG19 Model
+#vgg19 v2 2x(4096) lık dense layera sahip. O esnadaki en iyi ağırlıklara sahip. vgg19v3 2x(4096) dense layer ve o esnadaki son weights
 def vgg_19_model(img_width, img_height, color_type=3):
-    NumberOfClass = 10
-    vgg_19_model=VGG19(include_top=False,weights="imagenet",input_shape=(img_width,img_height,color_type)) ## include top false olursa fully connected layerı eklemez
-#    print(vgg_19_model.summary())
-    vgg_layer_list=vgg_19_model.layers
-#    print(vgg_layer_list)
+    base_model = VGG19(weights='imagenet', include_top=False, input_shape=(img_width, img_height, color_type))
+    for layer in enumerate(base_model.layers):
+        layer[1].trainable = False
     
-    model=Sequential()
+    #flatten the results from conv block
+    x = Flatten()(base_model.output)
     
-    for layer in vgg_layer_list:
-        model.add(layer)
-        
-    for layer in model.layers:
-        layer.trainable=False
-    #fully connected layer
-    model.add(Flatten())
-    model.add(Dense(128))
-    model.add(Dense(NumberOfClass,activation="softmax"))
+    #add another fully connected layers with batch norm and dropout
+    x = Dense(4096, activation='relu')(x)
+    x = BatchNormalization()(x)
+    x = Dropout(0.5)(x)
+    
+    #add another fully connected layers with batch norm and dropout
+    x = Dense(4096, activation='relu')(x)
+    x = BatchNormalization()(x)
+    x = Dropout(0.5)(x)
+    
+
+
+    #add logistic layer with all car classes
+    predictions = Dense(len(classes), activation='softmax', kernel_initializer='random_uniform', bias_initializer='random_uniform', bias_regularizer=regularizers.l2(0.01), name='predictions')(x)
+    
+    # this is the model we will train
+    model = Model(inputs=base_model.input, outputs=predictions)
     
     return model
 
@@ -282,13 +292,16 @@ def vgg_19_model(img_width, img_height, color_type=3):
 print("Loading Model")
 model_vgg19 = vgg_19_model(img_width, img_height)
 
-model_vgg19.load_weights('./HistoryAndWeightFiles/vgg19_model_weights.h5')
+model_vgg19.load_weights('./HistoryAndWeightFiles/vgg19_model_weights.hdf5')
 #
 #with codecs.open("./HistoryAndWeightFiles/vgg19_model_history.json","r",encoding = "utf-8") as f:
 #    history = json.loads(f.read())
 
 #%%
-predictImage("CNN ", modelCNN, test_files, 15)
-#predictImage("VGG16 ",model_vgg16, test_files, 32) 
-#predictImage("VGG19 ",model_vgg19, test_files, 2) 
+#predictImage("CNN ", modelCNN, test_files, 15)
+#predictImage("VGG16 ",model_vgg16, test_files, 10)
+predictImage("VGG19 ",model_vgg19, test_files,7) 
+#for i in range(100): 
+#    predictImage("VGG19 ",model_vgg19, test_files,i) 
+#    time.sleep(1)
     

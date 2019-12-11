@@ -9,11 +9,25 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import (QAction, QFileDialog)
-from .. import main
-model = main.Model()
+from PyQt5.QtGui import  QPixmap
+import os
+import sys 
+scriptpath = "../"
+
+# Add the directory containing your module to the Python path (wants absolute paths)
+sys.path.append('../')
+
+# Do the import
+#import MyModule
+#import mainClass.Model
+from classFolder import mainClass
+modelClass= mainClass.Klasa()
 
 class Ui_MainWindow(object):
+
     def setupUi(self, MainWindow):
+        modelClass.loadModel()
+#        print(modelClass.batch_size)
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(809, 600)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
@@ -36,9 +50,10 @@ class Ui_MainWindow(object):
         self.analyzeButton.setGeometry(QtCore.QRect(90, 300, 211, 41))
         self.analyzeButton.setObjectName("analyzeButton")
         self.analyzeButton.clicked.connect(self.analyze)
-        self.graphicsView = QtWidgets.QGraphicsView(self.centralwidget)
-        self.graphicsView.setGeometry(QtCore.QRect(450, 300, 331, 251))
-        self.graphicsView.setObjectName("graphicsView")
+        self.graphicLabel = QtWidgets.QLabel(self.centralwidget)
+        self.graphicLabel.setScaledContents(True)
+        self.graphicLabel.setGeometry(QtCore.QRect(450, 300, 320, 320))
+        self.graphicLabel.setObjectName("graphicLabel")
         self.imageResultLabel = QtWidgets.QLabel(self.centralwidget)
         self.imageResultLabel.setGeometry(QtCore.QRect(260, 520, 171, 16))
         self.imageResultLabel.setObjectName("imageResultLabel")
@@ -65,11 +80,16 @@ class Ui_MainWindow(object):
         fname = QFileDialog.getOpenFileName(self, 'Open file', '/home')
         print(fname[0])
         self.imagePathLabel.setText( fname[0])
+        print("2",self.imagePathLabel.text())
     def showDialogForPath(self):
         dir_name = QFileDialog.getExistingDirectory(self, 'Select Directory')
         self.filePathLabel.setText( dir_name)
         print(dir_name)
-    
+
     def analyze(self):
-        prediction=model.analyze(self.filePathLabel.text())
+        prediction=modelClass.analyze(self.imagePathLabel.text())
+        pixmap = QPixmap(self.imagePathLabel.text())
+#        pixmap.scaled(self.graphicLabel.size())
+        self.graphicLabel.setPixmap(pixmap)
         self.imageResultLabel.setText(prediction)
+#        pixmap.save

@@ -19,7 +19,7 @@ import cv2
 from sklearn.model_selection import train_test_split 
 from keras.utils import np_utils
 from keras.models import Sequential
-from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout,BatchNormalization,Activation
+from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout,BatchNormalization,Activation,ZeroPadding2D,Convolution2D
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.layers import Dense
 from keras.regularizers import l2,l1,l1_l2
@@ -97,8 +97,8 @@ def read_and_normalize_test_data(size, img_width, img_height, color_type=3):
     return test_data, test_ids
 
 
-img_width = 100 #64x64
-img_height = 100
+img_width = 64 #64x64
+img_height = 64
 color_type = 3 #grey scale
 
 #---------Train data--------------
@@ -148,46 +148,42 @@ for directory in os.listdir(url): #url içindeki tüm klasörlerde gezecek
                 plt.imshow(images) #images değişkenini çizdi
                 plt.title(classes[directory]) #başlığına classes içinden kendi grubunu koydu
 #%% MODEL Creation
-batch_size = 40
-epoch = 100      
+batch_size = 32
+epoch = 100     
 
 
 def createModel():
-    model=Sequential()
-    model.add(Conv2D(32,(3,3),kernel_regularizer=l2(0.01), bias_regularizer=l2(0.01),input_shape=(img_width, img_height, color_type))) #imageler 2D olduğu için Conv da 2D--- 32 tane filtre olacak aynı zamanda 32 feature map
-                                #imagelerın boyutu 3,3 lük bir matris input_shape başta bulununan resimlerin shapei
-    model.add(Activation("relu")) #relu aktivasyon fonksiyonu eklendi
-    model.add(MaxPooling2D()) #defaultu 2,2 lik olduğu için bıraktık
-    
-    
-    
-    model.add(Conv2D(32,(3,3),kernel_regularizer=l2(0.01), bias_regularizer=l2(0.01),input_shape=(img_width, img_height, color_type))) #imageler 2D olduğu için Conv da 2D--- 32 tane filtre olacak aynı zamanda 32 feature map
-                                #imagelerın boyutu 3,3 lük bir matris input_shape başta bulununan resimlerin shapei
-    model.add(Activation("relu")) #relu aktivasyon fonksiyonu eklendi
-    model.add(MaxPooling2D()) #defaultu 2,2 lik olduğu için bıraktık
-    
-    
-    model.add(Conv2D(64,(3,3),kernel_regularizer=l2(0.01), bias_regularizer=l2(0.01),input_shape=(img_width, img_height, color_type))) #imageler 2D olduğu için Conv da 2D--- 32 tane filtre olacak aynı zamanda 32 feature map
-                                #imagelerın boyutu 3,3 lük bir matris input_shape başta bulununan resimlerin shapei
-    model.add(Activation("relu")) #relu aktivasyon fonksiyonu eklendi
-    model.add(MaxPooling2D()) #defaultu 2,2 lik olduğu için bıraktık
-    
-    model.add(Conv2D(128,(3,3),kernel_regularizer=l2(0.01), bias_regularizer=l2(0.01),input_shape=(img_width, img_height, color_type))) #imageler 2D olduğu için Conv da 2D--- 32 tane filtre olacak aynı zamanda 32 feature map
-                                #imagelerın boyutu 3,3 lük bir matris input_shape başta bulununan resimlerin shapei
-    model.add(Activation("relu")) #relu aktivasyon fonksiyonu eklendi
-    model.add(MaxPooling2D()) #defaultu 2,2 lik olduğu için bıraktık
-    
-    
+    model = Sequential()
+    model.add(ZeroPadding2D((1, 1), input_shape=(64, 64, 3)))
+    model.add(Convolution2D(64, 3, 3, activation='relu'))
+    model.add(ZeroPadding2D((1,1)))
+    model.add(Convolution2D(64, 3, 3, activation='relu'))
+    model.add(MaxPooling2D((2,2),dim_ordering="th"))
+
+    model.add(ZeroPadding2D((1,1)))
+    model.add(Convolution2D(128, 3, 3, activation='relu'))
+    model.add(ZeroPadding2D((1,1)))
+    model.add(Convolution2D(128, 3, 3, activation='relu'))
+    model.add(MaxPooling2D((2,2),dim_ordering="th"))
+
+    model.add(ZeroPadding2D((1,1)))
+    model.add(Convolution2D(256, 3, 3, activation='relu'))
+    model.add(ZeroPadding2D((1,1)))
+    model.add(Convolution2D(256, 3, 3, activation='relu'))
+    model.add(ZeroPadding2D((1,1)))
+    model.add(Convolution2D(256, 3, 3, activation='relu'))
+    model.add(MaxPooling2D((2,2),dim_ordering="th"))
+
+    model.add(ZeroPadding2D((1,1)))
+    model.add(Convolution2D(512, 3, 3, activation='relu'))
+    model.add(ZeroPadding2D((1,1)))
+    model.add(Convolution2D(512, 3, 3, activation='relu'))
+    model.add(ZeroPadding2D((1,1)))
+    model.add(Convolution2D(512, 3, 3, activation='relu'))
+    model.add(MaxPooling2D((2,2),dim_ordering="th"))
+
     model.add(Flatten())
-#    model.add(Dense(1024)) #1024 tane nörondan oluşacak
-#    model.add(Activation("relu"))
-    
-    
-    model.add(Dense(NUMBER_CLASSES))#output class class sayısı başta bulunan class sayısı olmalı
-    model.add(Dropout(0.3)) #yani her tekrarda nöronların yarısı kapanacak makinenin ezberlemesi önlenecek
-
-    model.add(Activation("softmax")) #en son kullanılan softmax aktivasyonu eklendi
-
+    model.add(Dense(NUMBER_CLASSES, activation='softmax'))
     return model
 model = createModel()
 
@@ -195,9 +191,9 @@ model = createModel()
 model.summary()
 #
 ##modeli hazırlar
-es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=10)
-checkpoint = ModelCheckpoint('../HistoryAndWeightFiles/CNN_model_weights_v1.h5', monitor='val_loss', verbose=1, save_best_only=True, mode='min')
-model.compile(optimizer='rmsprop', loss='categorical_crossentropy',metrics=['accuracy'])
+es = EarlyStopping(monitor='accuracy', mode='min', verbose=1, patience=15)
+checkpoint = ModelCheckpoint('../HistoryAndWeightFiles/CNN_model_weights_v1.h5', monitor='accuracy', verbose=1, save_best_only=True, mode='min')
+model.compile(optimizer='adam', loss='categorical_crossentropy',metrics=['accuracy'])
 #
 training_generator = train_datagen.flow_from_directory('../../DataSet/train', 
                                                  target_size = (img_width, img_height), 
@@ -264,7 +260,7 @@ def predictImage(model, test_files, image_number, color_type=3):
 
     y_prediction = model.predict(reshapedImg, batch_size=batch_size, verbose=1)
     print('Predicted: {}'.format(classes.get('c{}'.format(np.argmax(y_prediction)))))
-    
+    print((y_prediction))
     plt.show()
     
-predictImage(model, test_files,34)
+predictImage(model, test_files,28)

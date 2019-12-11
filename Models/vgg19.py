@@ -116,9 +116,9 @@ def read_and_normalize_test_data(size, img_width, img_height, color_type=3):
     return test_data, test_ids
 
 
-img_width = 224
-img_height = 224
-color_type = 3 #rgb scale
+img_width = 120
+img_height = 120
+color_type = 1 #rgb scale
 
 #---------Train data--------------
 #x_train, x_test, y_train, y_test = read_and_normalize_train_data(img_width, img_height, color_type)
@@ -145,23 +145,23 @@ classes      = {'c0': 'Safe driving',
                 'c9': 'Talking to passenger'}
 
 batch_size = 40
-epoch = 50              
+epoch = 100              
 
 
-plt.figure(figsize = (12, 20))
-image_count = 1
-url = '../../DataSet/train/'
-for directory in os.listdir(url): #url içindeki tüm klasörlerde gezecek
-    if directory[0] != '.':
-        for i, file in enumerate(os.listdir(url + directory)):
-            if i == 1:
-                break
-            else:
-                fig = plt.subplot(5, 2, image_count)
-                image_count += 1
-                images = mpimg.imread(url + directory + '/' + file) #mpimg matplotlib içinde image göstermeye yarayan kütüphane
-                plt.imshow(images) #images değişkenini çizdi
-                plt.title(classes[directory]) #başlığına classes içinden kendi grubunu koydu
+#plt.figure(figsize = (12, 20))
+#image_count = 1
+#url = '../../DataSet/train/'
+#for directory in os.listdir(url): #url içindeki tüm klasörlerde gezecek
+#    if directory[0] != '.':
+#        for i, file in enumerate(os.listdir(url + directory)):
+#            if i == 1:
+#                break
+#            else:
+#                fig = plt.subplot(5, 2, image_count)
+#                image_count += 1
+#                images = mpimg.imread(url + directory + '/' + file) #mpimg matplotlib içinde image göstermeye yarayan kütüphane
+#                plt.imshow(images) #images değişkenini çizdi
+#                plt.title(classes[directory]) #başlığına classes içinden kendi grubunu koydu
 #%% VGG19----
 #%%Data Generator-------------
 # Prepare data augmentation configuration
@@ -187,11 +187,7 @@ def vgg_19_model(img_width, img_height, color_type=3):
     x = BatchNormalization()(x)
     x = Dropout(0.5)(x)
     
-    #add another fully connected layers with batch norm and dropout
-    x = Dense(4096, activation='relu')(x)
-    x = BatchNormalization()(x)
-    x = Dropout(0.5)(x)
-
+    
 
     #add logistic layer with all car classes
     predictions = Dense(len(classes), activation='softmax', kernel_initializer='random_uniform', bias_initializer='random_uniform', bias_regularizer=regularizers.l2(0.01), name='predictions')(x)
@@ -224,7 +220,7 @@ nb_validation_samples = 4481
 
 
 
-sgd = SGD(lr=0.01, momentum=0.9, decay=0.01, nesterov=True)
+sgd = SGD(lr=0.0001, momentum=0.9, decay=0.01, nesterov=True)
 
 model_vgg19.compile(loss='categorical_crossentropy',
                          optimizer=sgd,
@@ -233,8 +229,8 @@ model_vgg19.compile(loss='categorical_crossentropy',
 nb_train_samples = 17943
 nb_validation_samples = 4481
 #
-es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=5)
-checkpoint = ModelCheckpoint('../HistoryAndWeightFiles/vgg19_model_weights_v2.h5', monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
+es = EarlyStopping(monitor='accuracy', mode='min', verbose=1, patience=25)
+checkpoint = ModelCheckpoint('../HistoryAndWeightFiles/vgg19_model_weights.h5', monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
 history_vgg19 = model_vgg19.fit_generator(training_generator,
                          steps_per_epoch = nb_train_samples // batch_size,
                          epochs = epoch, 
@@ -245,12 +241,12 @@ history_vgg19 = model_vgg19.fit_generator(training_generator,
                          validation_steps = nb_validation_samples // batch_size)
 
 #%% Model save  
-model_vgg19.save_weights("../HistoryAndWeightFiles/vgg19_model_weights_v3.h5")
+#model_vgg19.save_weights("../HistoryAndWeightFiles/vgg19_model_weights.hdf5")
 histt=pd.Series(history_vgg19.history).to_json()
-with open("../HistoryAndWeightFiles/vgg19_model_history_v2.json","w") as f:  ##modelin accuracy değerlerini jsona yazar
+with open("../HistoryAndWeightFiles/vgg19_model_history.json","w") as f:  ##modelin accuracy değerlerini jsona yazar
     json.dump(histt,f) 
 #%% Load history table and weights
-#model_vgg19.load_weights('../HistoryAndWeightFiles/vgg19_model_weights.h5')
+model_vgg19.load_weights('../HistoryAndWeightFiles/vgg19_model_weights.hdf5')
 
 #with codecs.open("../HistoryAndWeightFiles/vgg19_model_history.json","r",encoding = "utf-8") as f:
 #    history = json.loads(f.read())
@@ -276,24 +272,23 @@ with open("../HistoryAndWeightFiles/vgg19_model_history_v2.json","w") as f:  ##m
 
 #%% prediction
 def plot_vgg19_test_class(model, test_files, image_number):
-    cv2.imwrite('../images/testImage.jpg', test_files[image_number])
-    img_brute = cv2.imread('../images/testImageVGG19.jpg',1)
-
-    im = cv2.resize(cv2.cvtColor(img_brute, cv2.COLOR_BGR2RGB), (img_width,img_height)).astype(np.float32) / 255.0
-    im = np.expand_dims(im, axis =0)
-
-    img_display = cv2.resize(img_brute,(img_width,img_height))
-    plt.imshow(img_display, cmap='gray')
-
-    y_preds = model.predict(im, batch_size=batch_size, verbose=1)
-    print(y_preds)
-    y_prediction = np.argmax(y_preds)
-    print('Y Prediction: {}'.format(y_prediction))
-    print('Predicted as: {}'.format(classes.get('c{}'.format(y_prediction))))
+        cv2.imwrite('./images/testImage.jpg', test_files[image_number])
+        img_brute = cv2.imread('./images/testImage.jpg',1)
     
-    plt.show()
+        im = cv2.resize(cv2.cvtColor(img_brute, cv2.COLOR_BGR2RGB), (img_width,img_height)).astype(np.float32) / 255.0
+        im = np.expand_dims(im, axis =0)
     
-plot_vgg19_test_class(model_vgg19, test_files, 30) # Texting left
+        img_display = cv2.resize(img_brute,(img_width,img_height))
+        plt.imshow(img_display, cmap='gray')
+    
+        y_preds = model.predict(im, batch_size=batch_size, verbose=1)
+        print(y_preds)
+        y_prediction = np.argmax(y_preds)
+        print('Y Prediction: {}'.format(y_prediction))
+        print('Predicted as: {}'.format(classes.get('c{}'.format(y_prediction))))
+        
+        plt.show()
+plot_vgg19_test_class(model_vgg19, test_files, 8) # Texting left
 
 
 #score = model_vgg19.evaluate_generator(validation_generator, nb_validation_samples // batch_size, verbose = 1)
