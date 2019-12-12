@@ -18,14 +18,14 @@ from IPython.display import FileLink
 import matplotlib.pyplot as plt
 import warnings
 warnings.filterwarnings('ignore')
-import seaborn as sns 
+import seaborn as sns
 #%matplotlib inline
 from IPython.display import display, Image
 import matplotlib.image as mpimg
 import cv2
 
 from sklearn.model_selection import train_test_split
-from sklearn.datasets import load_files       
+from sklearn.datasets import load_files
 from keras.utils import np_utils
 from sklearn.utils import shuffle
 from sklearn.metrics import log_loss
@@ -66,9 +66,9 @@ class Klasa:
         y_prediction = np.argmax(y_preds)
         print('Y Prediction: {}'.format(y_prediction))
         print('Predicted as: {}'.format(self.classes.get('c{}'.format(y_prediction))))
-        plt.show()
+        #plt.show()
         return self.classes.get('c{}'.format(y_prediction))
-    
+
     def analyze(self,path):
         image=self.readImage(path)
         prediction=self.predictImage(image)
@@ -79,21 +79,21 @@ class Klasa:
         base_model = VGG19(weights='imagenet', include_top=False, input_shape=(self.img_width, self.img_height, self.color_type))
         for layer in enumerate(base_model.layers):
             layer[1].trainable = False
-    
+
         #flatten the results from conv block
         x = Flatten()(base_model.output)
-    
+
         #add another fully connected layers with batch norm and dropout
         x = Dense(4096, activation='relu')(x)
         x = BatchNormalization()(x)
         x = Dropout(0.5)(x)
-    
+
         #add another fully connected layers with batch norm and dropout
         x = Dense(4096, activation='relu')(x)
         x = BatchNormalization()(x)
         x = Dropout(0.5)(x)
-    
-    
+
+
         #add logistic layer with all car classes
         predictions = Dense(len(self.classes), activation='softmax', kernel_initializer='random_uniform', bias_initializer='random_uniform', bias_regularizer=regularizers.l2(0.01), name='predictions')(x)
 
@@ -103,7 +103,7 @@ class Klasa:
 
     def loadWeights(self):
         print("Called")
-        
+
     def __init__(self):
         self.classes  = {'c0': 'Safe driving',
                         'c1': 'Texting - right',
@@ -115,12 +115,10 @@ class Klasa:
                         'c7': 'Reaching behind',
                         'c8': 'Hair and makeup',
                         'c9': 'Talking to passenger'}
-    
+
         self.NUMBER_CLASSES = 10
         self.batch_size = 40
         self.img_width = 224
         self.img_height = 224
         self.color_type = 3
         self.model = None
-        
-        

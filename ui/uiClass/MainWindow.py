@@ -11,7 +11,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import (QAction, QFileDialog)
 from PyQt5.QtGui import  QPixmap
 import os
-import sys 
+import sys
 scriptpath = "../"
 
 # Add the directory containing your module to the Python path (wants absolute paths)
