@@ -8,7 +8,7 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import (QAction, QFileDialog)
+from PyQt5.QtWidgets import (QAction, QFileDialog,QDialog)
 from PyQt5.QtGui import  QPixmap
 import os
 import sys
@@ -17,6 +17,8 @@ scriptpath = "../"
 # Add the directory containing your module to the Python path (wants absolute paths)
 sys.path.append('../')
 
+import videoWindow
+#videoClass= videoWindow.VideoPlayer()
 # Do the import
 #import MyModule
 #import mainClass.Model
@@ -36,13 +38,13 @@ class Ui_MainWindow(object):
         self.loadImageButton.setGeometry(QtCore.QRect(90, 90, 211, 61))
         self.loadImageButton.setObjectName("loadImageButton")
         self.loadImageButton.clicked.connect(self.showDialogForImage)
-        self.loadFilePathButton = QtWidgets.QPushButton(self.centralwidget)
-        self.loadFilePathButton.setGeometry(QtCore.QRect(90, 170, 211, 61))
-        self.loadFilePathButton.setObjectName("loadFilePathButton")
-        self.loadFilePathButton.clicked.connect(self.showDialogForPath)
-        self.filePathLabel = QtWidgets.QLabel(self.centralwidget)
-        self.filePathLabel.setGeometry(QtCore.QRect(340, 190, 451, 31))
-        self.filePathLabel.setObjectName("filePathLabel")
+        self.loadVideoButton = QtWidgets.QPushButton(self.centralwidget)
+        self.loadVideoButton.setGeometry(QtCore.QRect(90, 170, 211, 61))
+        self.loadVideoButton.setObjectName("loadVideoButton")
+        self.loadVideoButton.clicked.connect(self.showDialogForVideo)
+        self.videoPathLabel = QtWidgets.QLabel(self.centralwidget)
+        self.videoPathLabel.setGeometry(QtCore.QRect(340, 190, 451, 31))
+        self.videoPathLabel.setObjectName("videoPathLabel")
         self.imagePathLabel = QtWidgets.QLabel(self.centralwidget)
         self.imagePathLabel.setGeometry(QtCore.QRect(340, 110, 441, 16))
         self.imagePathLabel.setObjectName("imagePathLabel")
@@ -61,6 +63,7 @@ class Ui_MainWindow(object):
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
+        
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -69,8 +72,8 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "DDD"))
         self.loadImageButton.setText(_translate("MainWindow", "Load Image"))
-        self.loadFilePathButton.setText(_translate("MainWindow", "Load File Path"))
-        self.filePathLabel.setText(_translate("MainWindow", " "))
+        self.loadVideoButton.setText(_translate("MainWindow", "Load Video"))
+        self.videoPathLabel.setText(_translate("MainWindow", " "))
         self.imagePathLabel.setText(_translate("MainWindow", " "))
         self.analyzeButton.setText(_translate("MainWindow", "Analyze"))
         self.imageResultLabel.setText(_translate("MainWindow", "Image Result"))
@@ -81,10 +84,15 @@ class Ui_MainWindow(object):
         print(fname[0])
         self.imagePathLabel.setText( fname[0])
         print("2",self.imagePathLabel.text())
-    def showDialogForPath(self):
-        dir_name = QFileDialog.getExistingDirectory(self, 'Select Directory')
-        self.filePathLabel.setText( dir_name)
-        print(dir_name)
+    def showDialogForVideo(self):
+        fileName, _ = QFileDialog.getOpenFileName(self, "Select Video",
+                ".", "Video Files (*.mp4 *.flv *.ts *.mts *.avi)")
+        dialog = QDialog()
+        dialog.ui = videoWindow.VideoPlayer(fileName)
+        dialog.ui.setupUI(dialog)
+        dialog.setAttribute(QtCore.Qt.WA_DeleteOnClose)
+        dialog.exec_()
+        print(fileName)
 
     def analyze(self):
         prediction=modelClass.analyze(self.imagePathLabel.text())
