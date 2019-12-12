@@ -18,17 +18,17 @@ from IPython.display import FileLink
 import matplotlib.pyplot as plt
 import warnings
 warnings.filterwarnings('ignore')
-import seaborn as sns
+#import seaborn as sns
 #%matplotlib inline
 from IPython.display import display, Image
 import matplotlib.image as mpimg
 import cv2
 
-from sklearn.model_selection import train_test_split
-from sklearn.datasets import load_files
+#from sklearn.model_selection import train_test_split
+# from sklearn.datasets import load_files
 from keras.utils import np_utils
-from sklearn.utils import shuffle
-from sklearn.metrics import log_loss
+#from sklearn.utils import shuffle
+#from sklearn.metrics import log_loss
 
 from keras.models import Sequential, Model
 from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout, BatchNormalization, GlobalAveragePooling2D,Activation
