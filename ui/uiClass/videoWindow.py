@@ -2,19 +2,18 @@ from PyQt5.QtGui import QIcon, QFont
 from PyQt5.QtCore import QDir, Qt, QUrl, QSize
 from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer
 from PyQt5.QtMultimediaWidgets import QVideoWidget
-from PyQt5.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel, 
+from PyQt5.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel,
         QPushButton, QSizePolicy, QSlider, QStyle, QVBoxLayout, QWidget, QStatusBar)
 
 class VideoPlayer(QWidget):
 
 
     def startVideo(self,fileName):
-        if fileName != '':
-            self.mediaPlayer.setMedia(
-                    QMediaContent(QUrl.fromLocalFile(fileName)))
-            self.playButton.setEnabled(True)
-            self.statusBar.showMessage(fileName)
-            self.play()
+        self.mediaPlayer.setMedia(
+                QMediaContent(QUrl.fromLocalFile(fileName)))
+        self.playButton.setEnabled(True)
+        self.statusBar.showMessage(fileName)
+        self.play()
 
     def play(self):
         if self.mediaPlayer.state() == QMediaPlayer.PlayingState:
@@ -42,15 +41,14 @@ class VideoPlayer(QWidget):
     def handleError(self):
         self.playButton.setEnabled(False)
         self.statusBar.showMessage("Error: " + self.mediaPlayer.errorString())
-        
-    def setupUI(self, fileName,parent=None):
+
+    def setupUi(self,parent=None):
         super(VideoPlayer, self).__init__(parent)
 
+        self.resize(600,400)
         self.mediaPlayer = QMediaPlayer(None, QMediaPlayer.VideoSurface)
-
         btnSize = QSize(16, 16)
         videoWidget = QVideoWidget()
-        self.fileName = fileName
         self.playButton = QPushButton()
         self.playButton.setEnabled(False)
         self.playButton.setFixedHeight(24)
@@ -84,4 +82,3 @@ class VideoPlayer(QWidget):
         self.mediaPlayer.durationChanged.connect(self.durationChanged)
         self.mediaPlayer.error.connect(self.handleError)
         self.statusBar.showMessage("Ready")
-        self.startVideo(self.fileName)

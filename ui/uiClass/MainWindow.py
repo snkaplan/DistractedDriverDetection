@@ -63,7 +63,7 @@ class Ui_MainWindow(object):
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
-        
+
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -87,17 +87,20 @@ class Ui_MainWindow(object):
     def showDialogForVideo(self):
         fileName, _ = QFileDialog.getOpenFileName(self, "Select Video",
                 ".", "Video Files (*.mp4 *.flv *.ts *.mts *.avi)")
-        dialog = QDialog()
-        dialog.ui = videoWindow.VideoPlayer(fileName)
-        dialog.ui.setupUI(dialog)
-        dialog.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-        dialog.exec_()
-        print(fileName)
+        if fileName != '':
+            dialog = QDialog()
+            dialog.ui = videoWindow.VideoPlayer()
+            dialog.setWindowTitle("Analyzing Video")
+            dialog.ui.setupUi(dialog)
+            dialog.setAttribute(QtCore.Qt.WA_DeleteOnClose)
+            dialog.ui.startVideo(fileName)
+            dialog.exec_()
 
     def analyze(self):
-        prediction=modelClass.analyze(self.imagePathLabel.text())
-        pixmap = QPixmap(self.imagePathLabel.text())
-#        pixmap.scaled(self.graphicLabel.size())
-        self.graphicLabel.setPixmap(pixmap)
-        self.imageResultLabel.setText(prediction)
-#        pixmap.save
+        if self.imagePathLabel.text() != '':
+            prediction=modelClass.analyze(self.imagePathLabel.text())
+            pixmap = QPixmap(self.imagePathLabel.text())
+    #        pixmap.scaled(self.graphicLabel.size())
+            self.graphicLabel.setPixmap(pixmap)
+            self.imageResultLabel.setText(prediction)
+    #        pixmap.save
