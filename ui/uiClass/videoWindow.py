@@ -4,7 +4,9 @@ from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer
 from PyQt5.QtMultimediaWidgets import QVideoWidget
 from PyQt5.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel,
         QPushButton, QSizePolicy, QSlider, QStyle, QVBoxLayout, QWidget, QStatusBar)
-
+import cv2
+import os
+from threading import Thread
 class VideoPlayer(QWidget):
 
 
@@ -13,13 +15,21 @@ class VideoPlayer(QWidget):
                 QMediaContent(QUrl.fromLocalFile(fileName)))
         self.playButton.setEnabled(True)
         self.statusBar.showMessage(fileName)
-        self.play()
+        self.fileName=fileName
+        Thread(target = self.analyzeVideo).start()
+        Thread(target = self.play).start()
+
+        # self.play()
+        # self.analyzeVideo()
 
     def play(self):
         if self.mediaPlayer.state() == QMediaPlayer.PlayingState:
             self.mediaPlayer.pause()
+            self.isVideoPause=not self.isVideoPause
         else:
             self.mediaPlayer.play()
+            self.isVideoPause=not self.isVideoPause
+
 
     def mediaStateChanged(self, state):
         if self.mediaPlayer.state() == QMediaPlayer.PlayingState:
@@ -42,9 +52,29 @@ class VideoPlayer(QWidget):
         self.playButton.setEnabled(False)
         self.statusBar.showMessage("Error: " + self.mediaPlayer.errorString())
 
+    def analyzeVideo(self):
+        video=self.fileName
+        path_output_dir='C:/Users/s_ina/Desktop/videoParse'
+        vidcap = cv2.VideoCapture(video)
+        count = 0
+        while vidcap.isOpened():
+            while(not self.isVideoPause):
+                success, image = vidcap.read()
+                count += 1
+                if success:
+                    if(count%30==0):
+                        cv2.imwrite(os.path.join(path_output_dir, '%d.png') % count, image)
+
+                    # count += 1
+                else:
+                    break
+            cv2.destroyAllWindows()
+            vidcap.release()
+
     def setupUi(self,parent=None):
         super(VideoPlayer, self).__init__(parent)
-
+        self.fileName=""
+        self.isVideoPause=True
         self.resize(600,400)
         self.mediaPlayer = QMediaPlayer(None, QMediaPlayer.VideoSurface)
         btnSize = QSize(16, 16)
