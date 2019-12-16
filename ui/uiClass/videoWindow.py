@@ -6,7 +6,12 @@ from PyQt5.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel,
         QPushButton, QSizePolicy, QSlider, QStyle, QVBoxLayout, QWidget, QStatusBar)
 import cv2
 import os
+import time
 from threading import Thread
+import sys
+sys.path.append('../')
+from classFolder import mainClass
+modelClass= mainClass.Klasa()
 class VideoPlayer(QWidget):
 
 
@@ -16,19 +21,23 @@ class VideoPlayer(QWidget):
         self.playButton.setEnabled(True)
         self.statusBar.showMessage(fileName)
         self.fileName=fileName
-        Thread(target = self.analyzeVideo).start()
-        Thread(target = self.play).start()
+        Thread(target = self.takeFramesFromVideo).start()
+#        Thread(target = self.play).start()
 
         # self.play()
         # self.analyzeVideo()
 
     def play(self):
-        if self.mediaPlayer.state() == QMediaPlayer.PlayingState:
-            self.mediaPlayer.pause()
-            self.isVideoPause=not self.isVideoPause
-        else:
+        if self.mediaPlayer.state() != QMediaPlayer.PlayingState:
             self.mediaPlayer.play()
-            self.isVideoPause=not self.isVideoPause
+#            analyzeThread=Thread(target = self.analyzeVideo).start()
+            self.analyzeVideo()
+        else:        
+            self.mediaPlayer.pause()
+#            self.isVideoPause=not self.isVideoPause
+#            analyzeThread.Lock()
+
+
 
 
     def mediaStateChanged(self, state):
@@ -51,30 +60,52 @@ class VideoPlayer(QWidget):
     def handleError(self):
         self.playButton.setEnabled(False)
         self.statusBar.showMessage("Error: " + self.mediaPlayer.errorString())
-
+        
     def analyzeVideo(self):
+        if self.fileName == '':
+            pass
+        else:
+            idx=0
+            while(True):
+                if(os.path.isfile(self.outputFolder+"/"+str(idx)+".jpg")):
+#                    print(self.outputFolder+"/"+str(idx))
+                    modelClass.analyze(os.path.isfile(self.outputFolder+"/"+str(idx)+".jpg"))
+                else:
+                    break
+#               
+                idx=idx+1
+                time.sleep(3)
+#                pixmap = QPixmap(self.imagePathLabel.text())
+        #        pixmap.scaled(self.graphicLabel.size())
+#                self.graphicLabel.setPixmap(pixmap)
+#                self.imageResultLabel.setText(prediction)
+            
+
+    def takeFramesFromVideo(self):
         video=self.fileName
-        path_output_dir='C:/Users/s_ina/Desktop/videoParse'
+        self.outputFolder='C:/Users/gulsi/Desktop/videoParse/'+os.path.basename(video)
+        if not os.path.exists(self.outputFolder):
+            os.makedirs(self.outputFolder)
         vidcap = cv2.VideoCapture(video)
         count = 0
         while vidcap.isOpened():
-            while(not self.isVideoPause):
-                success, image = vidcap.read()
-                count += 1
-                if success:
-                    if(count%30==0):
-                        cv2.imwrite(os.path.join(path_output_dir, '%d.png') % count, image)
+            success, image = vidcap.read()
+            if success:
+                if(count%30==0):
+                    cv2.imwrite(os.path.join(self.outputFolder, '%d.jpg') % (count/30), image)
 
-                    # count += 1
-                else:
-                    break
-            cv2.destroyAllWindows()
-            vidcap.release()
+                count += 1
+            else:
+                break
+        cv2.destroyAllWindows()
+        vidcap.release()
 
     def setupUi(self,parent=None):
         super(VideoPlayer, self).__init__(parent)
         self.fileName=""
-        self.isVideoPause=True
+        self.outputFolder=""
+        self.lastAnalyzedPhotoIDX=0
+#        self.isVideoPause=True
         self.resize(600,400)
         self.mediaPlayer = QMediaPlayer(None, QMediaPlayer.VideoSurface)
         btnSize = QSize(16, 16)
