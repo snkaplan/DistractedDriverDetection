@@ -24,14 +24,14 @@ class VideoPlayer(QWidget):
         self.modelClass=modelClass
         Thread(target = self.takeFramesFromVideo).start()
         Thread(target = self.play).start()
-        Thread(target = self.analyzeVideo).start()
+
+        # Thread(target = self.analyzeVideo).start()
         # self.play()
         # self.analyzeVideo()
 
     def play(self):
         if self.mediaPlayer.state() != QMediaPlayer.PlayingState:
             self.mediaPlayer.play()
-
             # self.analyzeVideo()
         else:
             self.mediaPlayer.pause()
@@ -50,6 +50,9 @@ class VideoPlayer(QWidget):
                     self.style().standardIcon(QStyle.SP_MediaPlay))
 
     def positionChanged(self, position):
+        print(position)
+        if(self.mediaPlayer.state() == QMediaPlayer.PlayingState):
+            self.analyzeVideo(position//1000)
         self.positionSlider.setValue(position)
 
     def durationChanged(self, duration):
@@ -62,20 +65,16 @@ class VideoPlayer(QWidget):
         self.playButton.setEnabled(False)
         self.statusBar.showMessage("Error: " + self.mediaPlayer.errorString())
 
-    def analyzeVideo(self):
+    def analyzeVideo(self,position):
         if self.fileName == '':
             pass
         else:
-            idx=0
-            while(True):
-                if(os.path.isfile(self.outputFolder+"/"+str(idx)+".jpg")):
+            if(os.path.isfile(self.outputFolder+"/"+str(position)+".jpg")):
 #                    print(self.outputFolder+"/"+str(idx))
-                    prediction=self.modelClass.analyze(self.outputFolder+"/"+str(idx)+".jpg")
-                    print(prediction)
-                else:
-                    break
-                idx=idx+1
-                time.sleep(1)
+                prediction=self.modelClass.analyze(self.outputFolder+"/"+str(position)+".jpg")
+                print(prediction)
+            else:
+                pass
 
 
     def takeFramesFromVideo(self):
@@ -87,6 +86,8 @@ class VideoPlayer(QWidget):
         count = 0
         while vidcap.isOpened():
             success, image = vidcap.read()
+            grayFrame = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            image = cv2.cvtColor(grayFrame,cv2.COLOR_GRAY2RGB)
             if success:
                 if(count%30==0):
                     cv2.imwrite(os.path.join(self.outputFolder, '%d.jpg') % (count/30), image)
@@ -101,8 +102,6 @@ class VideoPlayer(QWidget):
         super(VideoPlayer, self).__init__(parent)
         self.fileName=""
         self.outputFolder=""
-        self.lastAnalyzedPhotoIDX=0
-#        self.isVideoPause=True
         self.resize(600,400)
         self.mediaPlayer = QMediaPlayer(None, QMediaPlayer.VideoSurface)
         btnSize = QSize(16, 16)
@@ -121,7 +120,6 @@ class VideoPlayer(QWidget):
         self.statusBar = QStatusBar()
         self.statusBar.setFont(QFont("Noto Sans", 7))
         self.statusBar.setFixedHeight(14)
-
         controlLayout = QHBoxLayout()
         controlLayout.setContentsMargins(0, 0, 0, 0)
         controlLayout.addWidget(self.playButton)
