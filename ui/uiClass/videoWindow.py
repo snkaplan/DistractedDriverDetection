@@ -11,28 +11,29 @@ from threading import Thread
 import sys
 sys.path.append('../')
 from classFolder import mainClass
-modelClass= mainClass.Klasa()
+# modelClass= mainClass.Klasa()
 class VideoPlayer(QWidget):
 
 
-    def startVideo(self,fileName):
+    def startVideo(self,fileName,modelClass):
         self.mediaPlayer.setMedia(
                 QMediaContent(QUrl.fromLocalFile(fileName)))
         self.playButton.setEnabled(True)
         self.statusBar.showMessage(fileName)
-        self.fileName=fileName
+        self.fileName = fileName
+        self.modelClass=modelClass
         Thread(target = self.takeFramesFromVideo).start()
-#        Thread(target = self.play).start()
-
+        Thread(target = self.play).start()
+        Thread(target = self.analyzeVideo).start()
         # self.play()
         # self.analyzeVideo()
 
     def play(self):
         if self.mediaPlayer.state() != QMediaPlayer.PlayingState:
             self.mediaPlayer.play()
-#            analyzeThread=Thread(target = self.analyzeVideo).start()
-            self.analyzeVideo()
-        else:        
+
+            # self.analyzeVideo()
+        else:
             self.mediaPlayer.pause()
 #            self.isVideoPause=not self.isVideoPause
 #            analyzeThread.Lock()
@@ -60,7 +61,7 @@ class VideoPlayer(QWidget):
     def handleError(self):
         self.playButton.setEnabled(False)
         self.statusBar.showMessage("Error: " + self.mediaPlayer.errorString())
-        
+
     def analyzeVideo(self):
         if self.fileName == '':
             pass
@@ -69,21 +70,17 @@ class VideoPlayer(QWidget):
             while(True):
                 if(os.path.isfile(self.outputFolder+"/"+str(idx)+".jpg")):
 #                    print(self.outputFolder+"/"+str(idx))
-                    modelClass.analyze(os.path.isfile(self.outputFolder+"/"+str(idx)+".jpg"))
+                    prediction=self.modelClass.analyze(self.outputFolder+"/"+str(idx)+".jpg")
+                    print(prediction)
                 else:
                     break
-#               
                 idx=idx+1
-                time.sleep(3)
-#                pixmap = QPixmap(self.imagePathLabel.text())
-        #        pixmap.scaled(self.graphicLabel.size())
-#                self.graphicLabel.setPixmap(pixmap)
-#                self.imageResultLabel.setText(prediction)
-            
+                time.sleep(1)
+
 
     def takeFramesFromVideo(self):
         video=self.fileName
-        self.outputFolder='C:/Users/gulsi/Desktop/videoParse/'+os.path.basename(video)
+        self.outputFolder='C:/Users/s_ina/Desktop/videoParse/'+os.path.basename(video)
         if not os.path.exists(self.outputFolder):
             os.makedirs(self.outputFolder)
         vidcap = cv2.VideoCapture(video)
@@ -143,3 +140,4 @@ class VideoPlayer(QWidget):
         self.mediaPlayer.durationChanged.connect(self.durationChanged)
         self.mediaPlayer.error.connect(self.handleError)
         self.statusBar.showMessage("Ready")
+        self.modelClass=None

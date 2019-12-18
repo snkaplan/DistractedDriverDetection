@@ -23,12 +23,13 @@ import videoWindow
 #import MyModule
 #import mainClass.Model
 from classFolder import mainClass
-modelClass= mainClass.Klasa()
+
 
 class Ui_MainWindow(object):
 
     def setupUi(self, MainWindow):
-        modelClass.loadModel()
+        self.modelClass= mainClass.Klasa()
+        self.modelClass.loadModel()
 #        print(modelClass.batch_size)
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(809, 600)
@@ -93,12 +94,12 @@ class Ui_MainWindow(object):
             dialog.setWindowTitle("Analyzing Video")
             dialog.ui.setupUi(dialog)
             dialog.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-            dialog.ui.startVideo(fileName)
+            dialog.ui.startVideo(fileName,self.modelClass)
             dialog.exec_()
 
     def analyze(self):
         if self.imagePathLabel.text() != '':
-            prediction=modelClass.analyze(self.imagePathLabel.text())
+            prediction=self.modelClass.analyze(self.imagePathLabel.text())
             pixmap = QPixmap(self.imagePathLabel.text())
     #        pixmap.scaled(self.graphicLabel.size())
             self.graphicLabel.setPixmap(pixmap)

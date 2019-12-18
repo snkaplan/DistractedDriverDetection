@@ -5,7 +5,8 @@ import os
 from glob import glob
 import random
 import time
-import tensorflow
+import tensorflow as tf
+graph = tf.get_default_graph()
 import datetime
 os.environ['KERAS_BACKEND'] = 'tensorflow'
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' # 3 = INFO, WARNING, and ERROR messages are not printed
@@ -60,8 +61,8 @@ class Klasa:
 
         img_display = cv2.resize(img_brute,(self.img_width,self.img_height))
         plt.imshow(img_display, cmap='gray')
-
-        y_preds = self.model.predict(im, batch_size=self.batch_size, verbose=1)
+        with graph.as_default():
+            y_preds = self.model.predict(im, batch_size=self.batch_size, verbose=1)
         print(y_preds)
         y_prediction = np.argmax(y_preds)
         print('Y Prediction: {}'.format(y_prediction))
@@ -70,6 +71,7 @@ class Klasa:
         return self.classes.get('c{}'.format(y_prediction))
 
     def analyze(self,path):
+        print(path)
         image=self.readImage(path)
         prediction=self.predictImage(image)
         return prediction
@@ -122,3 +124,4 @@ class Klasa:
         self.img_height = 224
         self.color_type = 3
         self.model = None
+        # self.loadModel()
