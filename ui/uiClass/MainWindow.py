@@ -30,9 +30,9 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         self.modelClass= mainClass.Klasa()
         self.modelClass.loadModel()
-#        print(modelClass.batch_size)
+        self.fileName=""
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(809, 600)
+        MainWindow.resize(700, 500)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.loadImageButton = QtWidgets.QPushButton(self.centralwidget)
@@ -43,22 +43,16 @@ class Ui_MainWindow(object):
         self.loadVideoButton.setGeometry(QtCore.QRect(90, 170, 211, 61))
         self.loadVideoButton.setObjectName("loadVideoButton")
         self.loadVideoButton.clicked.connect(self.showDialogForVideo)
-        self.videoPathLabel = QtWidgets.QLabel(self.centralwidget)
-        self.videoPathLabel.setGeometry(QtCore.QRect(340, 190, 451, 31))
-        self.videoPathLabel.setObjectName("videoPathLabel")
-        self.imagePathLabel = QtWidgets.QLabel(self.centralwidget)
-        self.imagePathLabel.setGeometry(QtCore.QRect(340, 110, 441, 16))
-        self.imagePathLabel.setObjectName("imagePathLabel")
         self.analyzeButton = QtWidgets.QPushButton(self.centralwidget)
         self.analyzeButton.setGeometry(QtCore.QRect(90, 300, 211, 41))
         self.analyzeButton.setObjectName("analyzeButton")
         self.analyzeButton.clicked.connect(self.analyze)
         self.graphicLabel = QtWidgets.QLabel(self.centralwidget)
         self.graphicLabel.setScaledContents(True)
-        self.graphicLabel.setGeometry(QtCore.QRect(450, 300, 320, 320))
+        self.graphicLabel.setGeometry(QtCore.QRect(340, 90, 320, 320))
         self.graphicLabel.setObjectName("graphicLabel")
         self.imageResultLabel = QtWidgets.QLabel(self.centralwidget)
-        self.imageResultLabel.setGeometry(QtCore.QRect(260, 520, 171, 16))
+        self.imageResultLabel.setGeometry(QtCore.QRect(180, 360, 171, 16))
         self.imageResultLabel.setObjectName("imageResultLabel")
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
@@ -74,17 +68,13 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "DDD"))
         self.loadImageButton.setText(_translate("MainWindow", "Load Image"))
         self.loadVideoButton.setText(_translate("MainWindow", "Load Video"))
-        self.videoPathLabel.setText(_translate("MainWindow", " "))
-        self.imagePathLabel.setText(_translate("MainWindow", " "))
         self.analyzeButton.setText(_translate("MainWindow", "Analyze"))
-        self.imageResultLabel.setText(_translate("MainWindow", "Image Result"))
+        self.imageResultLabel.setText(_translate("MainWindow", ""))
 
 
     def showDialogForImage(self):
         fname = QFileDialog.getOpenFileName(self, 'Open file', '/home')
-        print(fname[0])
-        self.imagePathLabel.setText( fname[0])
-        print("2",self.imagePathLabel.text())
+        self.fileName=fname[0]
     def showDialogForVideo(self):
         fileName, _ = QFileDialog.getOpenFileName(self, "Select Video",
                 ".", "Video Files (*.mp4 *.flv *.ts *.mts *.avi)")
@@ -98,10 +88,9 @@ class Ui_MainWindow(object):
             dialog.exec_()
 
     def analyze(self):
-        if self.imagePathLabel.text() != '':
-            prediction=self.modelClass.analyze(self.imagePathLabel.text())
-            pixmap = QPixmap(self.imagePathLabel.text())
-    #        pixmap.scaled(self.graphicLabel.size())
+        if self.fileName != '':
+            prediction=self.modelClass.analyze(self.fileName)
+            pixmap = QPixmap(self.fileName)
             self.graphicLabel.setPixmap(pixmap)
             self.imageResultLabel.setText(prediction)
     #        pixmap.save

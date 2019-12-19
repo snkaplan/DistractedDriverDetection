@@ -1,4 +1,4 @@
-from PyQt5.QtGui import QIcon, QFont
+from PyQt5.QtGui import QIcon, QFont, QPixmap
 from PyQt5.QtCore import QDir, Qt, QUrl, QSize
 from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer
 from PyQt5.QtMultimediaWidgets import QVideoWidget
@@ -11,7 +11,6 @@ from threading import Thread
 import sys
 sys.path.append('../')
 from classFolder import mainClass
-# modelClass= mainClass.Klasa()
 class VideoPlayer(QWidget):
 
 
@@ -25,18 +24,11 @@ class VideoPlayer(QWidget):
         Thread(target = self.takeFramesFromVideo).start()
         Thread(target = self.play).start()
 
-        # Thread(target = self.analyzeVideo).start()
-        # self.play()
-        # self.analyzeVideo()
-
     def play(self):
         if self.mediaPlayer.state() != QMediaPlayer.PlayingState:
             self.mediaPlayer.play()
-            # self.analyzeVideo()
         else:
             self.mediaPlayer.pause()
-#            self.isVideoPause=not self.isVideoPause
-#            analyzeThread.Lock()
 
 
 
@@ -50,7 +42,6 @@ class VideoPlayer(QWidget):
                     self.style().standardIcon(QStyle.SP_MediaPlay))
 
     def positionChanged(self, position):
-        print(position)
         if(self.mediaPlayer.state() == QMediaPlayer.PlayingState):
             self.analyzeVideo(position//1000)
         self.positionSlider.setValue(position)
@@ -70,16 +61,26 @@ class VideoPlayer(QWidget):
             pass
         else:
             if(os.path.isfile(self.outputFolder+"/"+str(position)+".jpg")):
-#                    print(self.outputFolder+"/"+str(idx))
+                label = QLabel()
+
                 prediction=self.modelClass.analyze(self.outputFolder+"/"+str(position)+".jpg")
-                print(prediction)
+                if(prediction != "Safe driving"):
+                    self.graphicLabel.setText("<img src=../images/warning.png align=middle> " + "Not Safe Driving")
+                    # pixmap = QPixmap(self.warningImage)                 
+                else:
+                    self.graphicLabel.setText("<img src=../images/check.png align=middle> " + "Safe Driving")
+                    # pixmap = QPixmap(self.checkImage)   
+                
+                # self.graphicLabel.setPixmap(pixmap)
+                
+                
             else:
                 pass
 
 
     def takeFramesFromVideo(self):
         video=self.fileName
-        self.outputFolder='C:/Users/s_ina/Desktop/videoParse/'+os.path.basename(video)
+        self.outputFolder='C:/Users/gulsi/Desktop/videoParse/'+os.path.basename(video)
         if not os.path.exists(self.outputFolder):
             os.makedirs(self.outputFolder)
         vidcap = cv2.VideoCapture(video)
@@ -120,6 +121,17 @@ class VideoPlayer(QWidget):
         self.statusBar = QStatusBar()
         self.statusBar.setFont(QFont("Noto Sans", 7))
         self.statusBar.setFixedHeight(14)
+
+        # self.statusBarForAnalyze = QStatusBar()
+        # self.statusBarForAnalyze.setFont(QFont("Noto Sans", 7))
+        # self.statusBarForAnalyze.setFixedHeight(14)
+
+        self.graphicLabel = QLabel()
+        self.graphicLabel.setScaledContents(True)
+        self.graphicLabel.setObjectName("graphicLabel")
+        self.graphicLabel.setFixedSize(300, 80)
+        self.graphicLabel.setTextFormat(Qt.RichText)
+
         controlLayout = QHBoxLayout()
         controlLayout.setContentsMargins(0, 0, 0, 0)
         controlLayout.addWidget(self.playButton)
@@ -129,6 +141,7 @@ class VideoPlayer(QWidget):
         layout.addWidget(videoWidget)
         layout.addLayout(controlLayout)
         layout.addWidget(self.statusBar)
+        layout.addWidget(self.graphicLabel)
 
         self.setLayout(layout)
 
@@ -139,3 +152,5 @@ class VideoPlayer(QWidget):
         self.mediaPlayer.error.connect(self.handleError)
         self.statusBar.showMessage("Ready")
         self.modelClass=None
+        self.checkImage="C:/DistractedDriverDetection/DistractedDriverDetection/ui/images/check.png"
+        self.warningImage="C:/DistractedDriverDetection/DistractedDriverDetection/ui/images/warning.png"
