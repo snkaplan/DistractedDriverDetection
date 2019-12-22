@@ -65,30 +65,35 @@ class VideoPlayer(QWidget):
 
                 prediction=self.modelClass.analyze(self.outputFolder+"/"+str(position)+".jpg")
                 if(prediction != "Safe driving"):
-                    self.graphicLabel.setText("<img src=../images/warning.png align=middle> " + "Not Safe Driving")
-                    # pixmap = QPixmap(self.warningImage)                 
+                    self.graphicLabel.setText("<img src=../images/warning.png align=middle> " + "Not Safe Driving ")
+                    self.safeDrivingCounter=0
+                    # pixmap = QPixmap(self.warningImage)
                 else:
-                    self.graphicLabel.setText("<img src=../images/check.png align=middle> " + "Safe Driving")
-                    # pixmap = QPixmap(self.checkImage)   
-                
+                    self.safeDrivingCounter = self.safeDrivingCounter + 1
+                    if(self.safeDrivingCounter>=2):
+                        self.graphicLabel.setText("<img src=../images/check.png align=middle> " + "Safe Driving")
+                    else:
+                        self.graphicLabel.setText(" ")
+                    # pixmap = QPixmap(self.checkImage)
+
                 # self.graphicLabel.setPixmap(pixmap)
-                
-                
+
+
             else:
                 pass
 
 
     def takeFramesFromVideo(self):
         video=self.fileName
-        self.outputFolder='C:/Users/gulsi/Desktop/videoParse/'+os.path.basename(video)
+        self.outputFolder='C:/Users/s_ina/Desktop/videoParse/'+os.path.basename(video)
         if not os.path.exists(self.outputFolder):
             os.makedirs(self.outputFolder)
         vidcap = cv2.VideoCapture(video)
         count = 0
         while vidcap.isOpened():
             success, image = vidcap.read()
-            grayFrame = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            image = cv2.cvtColor(grayFrame,cv2.COLOR_GRAY2RGB)
+            # grayFrame = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            # image = cv2.cvtColor(grayFrame,cv2.COLOR_GRAY2RGB)
             if success:
                 if(count%30==0):
                     cv2.imwrite(os.path.join(self.outputFolder, '%d.jpg') % (count/30), image)
@@ -152,5 +157,6 @@ class VideoPlayer(QWidget):
         self.mediaPlayer.error.connect(self.handleError)
         self.statusBar.showMessage("Ready")
         self.modelClass=None
+        self.safeDrivingCounter=2
         self.checkImage="C:/DistractedDriverDetection/DistractedDriverDetection/ui/images/check.png"
         self.warningImage="C:/DistractedDriverDetection/DistractedDriverDetection/ui/images/warning.png"
