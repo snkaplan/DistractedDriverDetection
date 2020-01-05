@@ -94,7 +94,7 @@ def read_and_normalize_train_data(img_width, img_height, color_type):
 
 # Test klasöründeki tüm resimleri okuyacak
 def load_test(size=200000, img_width=64, img_height=64, color_type=3):
-    path = os.path.join( '../'+'DataSet', 'test', '*.jpg') #/DataSet/test/içerisinde tüm jpgleri alır
+    path = os.path.join( '../'+'DataSet', 'videoPhotos', '*.jpg') #/DataSet/test/içerisinde tüm jpgleri alır
     files = sorted(glob(path)) #topladığı dosyaları sıraladı 79000 fotoğraf
     X_test, X_test_id = [], [] 
     total = 0
@@ -119,8 +119,8 @@ def read_and_normalize_test_data(size, img_width, img_height, color_type=3):
     return test_data, test_ids
 
 
-img_width = 120 #64x64
-img_height = 120
+img_width = 224 #64x64
+img_height = 224
 color_type = 3 #grey scale
 
 #---------Train data--------------
@@ -165,6 +165,7 @@ def predictImage(modelName,model, test_files, image_number):
         print('Predicted: {}'.format(classes.get('c{}'.format(np.argmax(y_prediction)))))
         
         plt.show()
+        return y_prediction
     
     else:
         cv2.imwrite('./images/testImage.jpg', test_files[image_number])
@@ -183,6 +184,7 @@ def predictImage(modelName,model, test_files, image_number):
         print(modelName+'Predicted as: {}'.format(classes.get('c{}'.format(y_prediction))))
         
         plt.show()
+        return y_preds
 #%%LOAD CNN MODEL             
 def createModel():
     model = Sequential() #sıralı model
@@ -261,38 +263,39 @@ model_vgg16.load_weights('./HistoryAndWeightFiles/vgg16_model_weights.h5')
 #%% VGG19 Model
 #vgg19 v2 2x(4096) lık dense layera sahip. O esnadaki en iyi ağırlıklara sahip. vgg19v3 2x(4096) dense layer ve o esnadaki son weights
 def vgg_19_model(img_width, img_height, color_type=3):
+    # create the base pre-trained model
     base_model = VGG19(weights='imagenet', include_top=False, input_shape=(img_width, img_height, color_type))
     for layer in enumerate(base_model.layers):
         layer[1].trainable = False
-    
+
     #flatten the results from conv block
     x = Flatten()(base_model.output)
-    
+
     #add another fully connected layers with batch norm and dropout
     x = Dense(4096, activation='relu')(x)
     x = BatchNormalization()(x)
     x = Dropout(0.5)(x)
-    
+
     #add another fully connected layers with batch norm and dropout
     x = Dense(4096, activation='relu')(x)
     x = BatchNormalization()(x)
     x = Dropout(0.5)(x)
-    
 
 
     #add logistic layer with all car classes
     predictions = Dense(len(classes), activation='softmax', kernel_initializer='random_uniform', bias_initializer='random_uniform', bias_regularizer=regularizers.l2(0.01), name='predictions')(x)
-    
+
     # this is the model we will train
     model = Model(inputs=base_model.input, outputs=predictions)
-    
+
     return model
 
-# Load the VGG19 network
-print("Loading Model")
+# Load the VGG16 network
+print("Loading Model...")
 model_vgg19 = vgg_19_model(img_width, img_height)
 
-model_vgg19.load_weights('./HistoryAndWeightFiles/vgg19_model_weights.hdf5')
+
+model_vgg19.load_weights('./HistoryAndWeightFiles/vgg19_model_weights_v2.h5')
 #
 #with codecs.open("./HistoryAndWeightFiles/vgg19_model_history.json","r",encoding = "utf-8") as f:
 #    history = json.loads(f.read())
@@ -300,8 +303,8 @@ model_vgg19.load_weights('./HistoryAndWeightFiles/vgg19_model_weights.hdf5')
 #%%
 #predictImage("CNN ", modelCNN, test_files, 15)
 #predictImage("VGG16 ",model_vgg16, test_files, 10)
-predictImage("VGG19 ",model_vgg19, test_files,7) 
-#for i in range(100): 
+prediction=predictImage("VGG19 ",model_vgg19, test_files,5) 
+#for i in range(88): 
 #    predictImage("VGG19 ",model_vgg19, test_files,i) 
 #    time.sleep(1)
     

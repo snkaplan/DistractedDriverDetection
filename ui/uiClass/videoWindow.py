@@ -9,6 +9,8 @@ import os
 import time
 from threading import Thread
 import sys
+from shutil import copy
+from datetime import datetime
 sys.path.append('../')
 from classFolder import mainClass
 class VideoPlayer(QWidget):
@@ -66,6 +68,14 @@ class VideoPlayer(QWidget):
                 prediction=self.modelClass.analyze(self.outputFolder+"/"+str(position)+".jpg")
                 if(prediction != "Safe driving"):
                     self.graphicLabel.setText("<img src=../images/warning.png align=middle> " + "Not Safe Driving ")
+                    resultsFolder='C:/DistractedDriverDetection/Frames/VideoResults/'+os.path.basename(self.fileName)
+                    nowTime=datetime.now().strftime("%d-%m-%Y %H-%M-%S.%f'")
+                    if not os.path.exists(resultsFolder):
+                        os.makedirs(resultsFolder)
+                    copy(self.outputFolder+"/"+str(position)+".jpg", 'C:/DistractedDriverDetection/Frames/VideoResults/'+os.path.basename(self.fileName)+"/"+str(position)+"_"+nowTime+".jpg")
+                    # src ='C:/DistractedDriverDetection/Frames/VideoResults/'+os.path.basename(self.fileName)+"/"+str(position)+".jpg"
+                    # dst ='C:/DistractedDriverDetection/Frames/VideoResults/'+os.path.basename(self.fileName)+"/"+str(position)+"_"+nowTime+".jpg"
+                    # os.rename(src, dst)
                     self.safeDrivingCounter=0
                     # pixmap = QPixmap(self.warningImage)
                 else:
@@ -85,7 +95,7 @@ class VideoPlayer(QWidget):
 
     def takeFramesFromVideo(self):
         video=self.fileName
-        self.outputFolder='C:/Users/s_ina/Desktop/videoParse/'+os.path.basename(video)
+        self.outputFolder='C:/DistractedDriverDetection/Frames/VideoParse/'+os.path.basename(video)
         if not os.path.exists(self.outputFolder):
             os.makedirs(self.outputFolder)
         vidcap = cv2.VideoCapture(video)
