@@ -1,12 +1,3 @@
-# -*- coding: utf-8 -*-
-
-# Form implementation generated from reading ui file 'main.ui'
-#
-# Created by: PyQt5 UI code generator 5.13.2
-#
-# WARNING! All changes made in this file will be lost!
-
-
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import (QAction, QFileDialog,QDialog)
 from PyQt5.QtGui import  QPixmap
@@ -14,14 +5,9 @@ import os
 import sys
 scriptpath = "../"
 
-# Add the directory containing your module to the Python path (wants absolute paths)
 sys.path.append('../')
 
 import videoWindow
-#videoClass= videoWindow.VideoPlayer()
-# Do the import
-#import MyModule
-#import mainClass.Model
 from classFolder import mainClass
 
 

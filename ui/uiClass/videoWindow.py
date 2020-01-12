@@ -84,10 +84,6 @@ class VideoPlayer(QWidget):
                         self.graphicLabel.setText("<img src=../images/check.png align=middle> " + "Safe Driving")
                     else:
                         self.graphicLabel.setText(" ")
-                    # pixmap = QPixmap(self.checkImage)
-
-                # self.graphicLabel.setPixmap(pixmap)
-
 
             else:
                 pass
@@ -102,8 +98,6 @@ class VideoPlayer(QWidget):
         count = 0
         while vidcap.isOpened():
             success, image = vidcap.read()
-            # grayFrame = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            # image = cv2.cvtColor(grayFrame,cv2.COLOR_GRAY2RGB)
             if success:
                 if(count%30==0):
                     cv2.imwrite(os.path.join(self.outputFolder, '%d.jpg') % (count/30), image)
@@ -136,10 +130,6 @@ class VideoPlayer(QWidget):
         self.statusBar = QStatusBar()
         self.statusBar.setFont(QFont("Noto Sans", 7))
         self.statusBar.setFixedHeight(14)
-
-        # self.statusBarForAnalyze = QStatusBar()
-        # self.statusBarForAnalyze.setFont(QFont("Noto Sans", 7))
-        # self.statusBarForAnalyze.setFixedHeight(14)
 
         self.graphicLabel = QLabel()
         self.graphicLabel.setScaledContents(True)
