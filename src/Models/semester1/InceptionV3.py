@@ -224,19 +224,19 @@ with open("../HistoryAndWeightFiles/InceptionV3_Model_History_v6.json","w") as f
 #%%Model Load
 #model.load_weights('../HistoryAndWeightFiles/Indception_Model_Weights_v2.h5') #kayıtlı değişkenleri modele yükler
 
-with codecs.open("../HistoryAndWeightFiles/InceptionV3_Model_History_v6.json","r",encoding = "utf-8") as f: #accuracy ve lost değişkenlerini tekrar yükler
+with codecs.open("../../HistoryAndWeightFiles/vgg16_model_history.json","r",encoding = "utf-8") as f: #accuracy ve lost değişkenlerini tekrar yükler
     oldHistory = json.loads(f.read())
+print(oldHistory)
+def plot_train_history(history):
+    plt.plot(history["acc"])
+    plt.plot(history["val_acc"])
+    plt.title("Model accuracy")
+    plt.ylabel("accuracy")
+    plt.xlabel("epoch")
+    plt.legend(["train", "test"], loc="upper left")
+    plt.show()
 
-#def plot_train_history(history):
-#    plt.plot(history['accuracy'])
-#    plt.plot(history['val_accuracy'])
-#    plt.title('Model accuracy')
-#    plt.ylabel('accuracy')
-#    plt.xlabel('epoch')
-#    plt.legend(['train', 'test'], loc='upper left')
-#    plt.show()
-#
-#    # Summarize history for loss
+    # Summarize history for loss
 #    plt.plot(history['loss'])
 #    plt.plot(history['val_loss'])
 #    plt.title('Model loss')
@@ -244,7 +244,7 @@ with codecs.open("../HistoryAndWeightFiles/InceptionV3_Model_History_v6.json","r
 #    plt.xlabel('epoch')
 #    plt.legend(['train', 'test'], loc='upper left')
 #    plt.show()
-#plot_train_history(oldHistory)
+plot_train_history(oldHistory)
 #%% Prediction Field
 def predictImage(model, test_files, image_number, color_type=3):
     img = test_files[image_number]
