@@ -31,7 +31,7 @@ from keras.layers.normalization import BatchNormalization
 from keras import optimizers
 
 #%%
-driver_details = pd.read_csv('../csvFiles/driver_imgs_list.csv',na_values='na')
+driver_details = pd.read_csv('../../csvFiles/driver_imgs_list.csv',na_values='na')
 print(driver_details.head(5))
 #%%
 train_image = []
@@ -40,7 +40,7 @@ image_label = []
 
 for i in range(10):
     print('now we are in the folder C',i)
-    imgs = os.listdir("../../../DataSet/train/c"+str(i))
+    imgs = os.listdir("../../../../DataSet/train/c"+str(i))
 #    print(imgs)
     for j in range(len(imgs)):
     #for j in range(100):
@@ -130,26 +130,30 @@ sgd = optimizers.SGD(lr = 0.001)
 resnet50_pretrained.compile(loss='categorical_crossentropy',optimizer = sgd,metrics=['accuracy'])
 #%%
 #Train Model
-from keras.preprocessing.image import ImageDataGenerator
-from keras.callbacks import ModelCheckpoint,EarlyStopping
+# from keras.preprocessing.image import ImageDataGenerator
+# from keras.callbacks import ModelCheckpoint,EarlyStopping
 
-checkpointer = ModelCheckpoint('resnet_weights_aug_extralayers_sgd_setval.hdf5', verbose=1, save_best_only=True)
-earlystopper = EarlyStopping(monitor='accuracy', patience=7, verbose=1)
+# checkpointer = ModelCheckpoint('resnet_weights_aug_extralayers_sgd_setval.hdf5', verbose=1, save_best_only=True)
+# earlystopper = EarlyStopping(monitor='accuracy', patience=7, verbose=1)
 
 
-datagen = ImageDataGenerator(
-    height_shift_range=0.5,
-    width_shift_range = 0.5,
-    zoom_range = 0.5,
-    rotation_range=30
-        )
-#datagen.fit(X_train)
-data_generator = datagen.flow(X_train, y_train, batch_size = 64)
+# datagen = ImageDataGenerator(
+#     height_shift_range=0.5,
+#     width_shift_range = 0.5,
+#     zoom_range = 0.5,
+#     rotation_range=30
+#         )
+# #datagen.fit(X_train)
+# data_generator = datagen.flow(X_train, y_train, batch_size = 64)
 
-# Fits the model on batches with real-time data augmentation:
-resnet50_model = resnet50_pretrained.fit_generator(data_generator,steps_per_epoch = len(X_train) / 64, callbacks=[checkpointer, earlystopper],
-                                                            epochs = 40, verbose = 1, validation_data = (X_test, y_test))
+# # Fits the model on batches with real-time data augmentation:
+# resnet50_model = resnet50_pretrained.fit_generator(data_generator,steps_per_epoch = len(X_train) / 64, callbacks=[checkpointer, earlystopper],
+#                                                             epochs = 40, verbose = 1, validation_data = (X_test, y_test))
 
+#%%
+
+
+resnet50_pretrained.load_weights('../../../HistoryAndWeightFiles/resnet50(2).hdf5')
 #%%
 # from tensorflow.python.client import device_lib
 
@@ -157,4 +161,93 @@ resnet50_model = resnet50_pretrained.fit_generator(data_generator,steps_per_epoc
 #     local_device_protos = device_lib.list_local_devices()
 #     return [x.name for x in local_device_protos if x.device_type == 'GPU']
 
+#%%
+# Read images
+val_image = []
+clean_image = []
+i = 0
+
+files = sorted(os.listdir('../../../../DataSet/test'))
+for i in range(100):
+    if i == 0:
+        continue
+    else:
+        print(files[i])
+        img = cv2.imread('../../../../DataSet/test/'+files[i])
+        clean_image.append(img)
+        img = img[50:,120:-50]
+        img = cv2.resize(img,(224,224))
+        val_image.append(img)
+
+print('All images are loaded')
+
+X_test = []
+
+for features in val_image:
+    X_test.append(features)
+    
+print (len(X_test))
+X_test = np.array(X_test).reshape(-1,224,224,3)
+
+print (X_test.shape)
+#%% denemeVideo
+val_image = []
+clean_image = []
+i = 0
+
+files = sorted(os.listdir('C:/DistractedDriverDetection/Frames/VideoParse/skVideo580x480.mp4'))
+for i in range(92):
+    if i == 0:
+        continue
+    else:
+        print(files[i])
+        img = cv2.imread('C:/DistractedDriverDetection/Frames/VideoParse/skVideo580x480.mp4/'+files[i])
+        clean_image.append(img)
+        img = img[50:,120:-50]
+        img = cv2.resize(img,(224,224))
+        val_image.append(img)
+
+print('All images are loaded')
+
+X_test = []
+
+for features in val_image:
+    X_test.append(features)
+    
+print (len(X_test))
+X_test = np.array(X_test).reshape(-1,224,224,3)
+
+print (X_test.shape)
+#%%
+classes      = {'c0': 'Safe driving',
+                'c1': 'Texting - right',
+                'c2': 'Talking on the phone - right',
+                'c3': 'Texting - left',
+                'c4': 'Talking on the phone - left',
+                'c5': 'Operating the radio',
+                'c6': 'Drinking',
+                'c7': 'Reaching behind',
+                'c8': 'Hair and makeup',
+                'c9': 'Talking to passenger'}
+#%% prediction
+def resnetPredict(model, img):
+    cv2.imwrite('../../images/testImageResNet.jpg', img)
+    img_brute = cv2.imread('../../images/testImageResNet.jpg',1)
+
+    # im = cv2.resize(cv2.cvtColor(img_brute, cv2.COLOR_BGR2RGB), (224,224)).astype(np.float32) / 255.0
+    # im = np.expand_dims(im, axis =0)
+
+    img_display = cv2.resize(img_brute,(224,224))
+    plt.imshow(img_display, cmap='gray')
+    img = img.reshape(-1,224,224,3)
+    y_preds = model.predict(img)
+    print(y_preds)
+    for pred in y_preds:
+        y_prediction = np.argmax(pred)
+        print('Y Prediction: {}'.format(y_prediction))
+        print('Predicted as: {}'.format(classes.get('c{}'.format(y_prediction))))
+
+    plt.show()
+
+resnetPredict(resnet50_pretrained, X_test[80]) # Texting left
 # print(get_available_gpus())

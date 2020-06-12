@@ -1,0 +1,96 @@
+{"level": "WARNING", "time": "13-05-2020 21-44-03.790421'", "fileName": "0.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-04.423726'", "fileName": "0.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-05.145795'", "fileName": "0.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-05.912866'", "fileName": "0.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-07.272892'", "fileName": "1.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-08.272984'", "fileName": "2.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-09.278317'", "fileName": "3.jpg", "msg": "Talking to passenger", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-10.282141'", "fileName": "4.jpg", "msg": "Talking to passenger", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-11.278539'", "fileName": "5.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-12.269467'", "fileName": "6.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-13.275401'", "fileName": "7.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-14.274892'", "fileName": "8.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-15.273879'", "fileName": "9.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-16.276252'", "fileName": "10.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-17.272745'", "fileName": "11.jpg", "msg": "Reaching behind", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-18.274393'", "fileName": "12.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-19.273973'", "fileName": "13.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-20.279983'", "fileName": "14.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-21.343864'", "fileName": "15.jpg", "msg": "Reaching behind", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-22.382890'", "fileName": "16.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-23.391773'", "fileName": "17.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-24.348857'", "fileName": "18.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-25.292962'", "fileName": "19.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-26.365236'", "fileName": "20.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-27.350750'", "fileName": "21.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-28.375865'", "fileName": "22.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-29.286955'", "fileName": "23.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-30.313822'", "fileName": "24.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-31.286727'", "fileName": "25.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-32.286061'", "fileName": "26.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-33.285094'", "fileName": "27.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-34.297477'", "fileName": "28.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-35.283403'", "fileName": "29.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-36.334325'", "fileName": "30.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-37.415974'", "fileName": "31.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-38.317088'", "fileName": "32.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-39.324394'", "fileName": "33.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-40.297937'", "fileName": "34.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-41.307841'", "fileName": "35.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-42.288725'", "fileName": "36.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-43.365552'", "fileName": "37.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-44.302243'", "fileName": "38.jpg", "msg": "Hair and makeup", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-45.292481'", "fileName": "39.jpg", "msg": "Hair and makeup", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-46.297123'", "fileName": "40.jpg", "msg": "Talking to passenger", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-47.296071'", "fileName": "41.jpg", "msg": "Reaching behind", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-48.298505'", "fileName": "42.jpg", "msg": "Reaching behind", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-49.298286'", "fileName": "43.jpg", "msg": "Reaching behind", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-50.297899'", "fileName": "44.jpg", "msg": "Hair and makeup", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-51.298206'", "fileName": "45.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-52.291512'", "fileName": "46.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-53.292649'", "fileName": "47.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-54.289158'", "fileName": "48.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-55.284594'", "fileName": "49.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-56.284643'", "fileName": "50.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-57.285979'", "fileName": "51.jpg", "msg": "Hair and makeup", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-58.283936'", "fileName": "52.jpg", "msg": "Hair and makeup", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-44-59.285495'", "fileName": "53.jpg", "msg": "Reaching behind", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-45-00.299258'", "fileName": "54.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-45-01.291680'", "fileName": "55.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-45-02.286458'", "fileName": "56.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-45-03.289669'", "fileName": "57.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-45-04.286178'", "fileName": "58.jpg", "msg": "Talking to passenger", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-45-05.291935'", "fileName": "59.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-45-06.330597'", "fileName": "60.jpg", "msg": "Hair and makeup", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-45-07.297076'", "fileName": "61.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-45-08.303961'", "fileName": "62.jpg", "msg": "Hair and makeup", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-45-09.281627'", "fileName": "63.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-45-10.283346'", "fileName": "64.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-45-11.283512'", "fileName": "65.jpg", "msg": "Hair and makeup", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-45-12.284472'", "fileName": "66.jpg", "msg": "Hair and makeup", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-45-13.286690'", "fileName": "67.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-45-14.292496'", "fileName": "68.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-45-15.285418'", "fileName": "69.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-45-16.284471'", "fileName": "70.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-45-17.287786'", "fileName": "71.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-45-18.287936'", "fileName": "72.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-45-19.280017'", "fileName": "73.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-45-20.286290'", "fileName": "74.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-45-21.283203'", "fileName": "75.jpg", "msg": "Reaching behind", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-45-22.283124'", "fileName": "76.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-45-23.285197'", "fileName": "77.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-45-24.283331'", "fileName": "78.jpg", "msg": "Reaching behind", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-45-25.286584'", "fileName": "79.jpg", "msg": "Reaching behind", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-45-26.281979'", "fileName": "80.jpg", "msg": "Reaching behind", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-45-27.280631'", "fileName": "81.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-45-28.281140'", "fileName": "82.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-45-29.280313'", "fileName": "83.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-45-30.289388'", "fileName": "84.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-45-31.292450'", "fileName": "85.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-45-32.287122'", "fileName": "86.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-45-33.286260'", "fileName": "87.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-45-34.288285'", "fileName": "88.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-45-35.282330'", "fileName": "89.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-45-36.284218'", "fileName": "90.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-45-37.275631'", "fileName": "91.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "13-05-2020 21-45-37.638664'", "fileName": "91.jpg", "msg": "Talking on the phone - left", "hostname": "pc", "version": "1.0"}
