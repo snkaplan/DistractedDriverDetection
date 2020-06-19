@@ -1,0 +1,9 @@
+{"level": "WARNING", "time": "19-06-2020 12-41-42.846782'", "fileName": "0.jpg", "msg": "Texting - right", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "19-06-2020 12-41-43.892988'", "fileName": "1.jpg", "msg": "Talking to passenger", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "19-06-2020 12-41-44.833088'", "fileName": "2.jpg", "msg": "Talking to passenger", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "19-06-2020 12-41-45.726698'", "fileName": "3.jpg", "msg": "Talking to passenger", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "19-06-2020 12-41-46.713059'", "fileName": "4.jpg", "msg": "Talking to passenger", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "19-06-2020 12-41-47.723566'", "fileName": "5.jpg", "msg": "Talking to passenger", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "19-06-2020 12-41-48.743340'", "fileName": "6.jpg", "msg": "Talking to passenger", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "19-06-2020 12-41-49.786690'", "fileName": "7.jpg", "msg": "Talking to passenger", "hostname": "pc", "version": "1.0"}
+{"level": "WARNING", "time": "19-06-2020 12-41-50.745927'", "fileName": "8.jpg", "msg": "Talking to passenger", "hostname": "pc", "version": "1.0"}

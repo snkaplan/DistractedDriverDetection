@@ -15,6 +15,8 @@ import json
 import shutil
 sys.path.append('../')
 from classFolder import mainClass
+import DBContext
+
 class VideoPlayer(QWidget):
 
 
@@ -86,6 +88,7 @@ class VideoPlayer(QWidget):
                     # pixmap = QPixmap(self.warningImage)
                     imageName= str(position)+".jpg"
                     self.writeLog(imageName,nowTime,prediction)
+                    self.insertToDB(prediction)
                 else:
                     self.safeDrivingCounter = self.safeDrivingCounter + 1
                     self.graphicLabel.setText("<img src=../images/check.png align=middle> " + "Safe Driving")
@@ -96,10 +99,22 @@ class VideoPlayer(QWidget):
             else:
                 pass
 
+    def insertToDB(self,message):
+        row = self.createDDDRow(message)
+        videoName = os.path.basename(self.fileName)
+        self.dbContext.insertRow(row,videoName)
+    def createDDDRow(self,message):
+        videoName = os.path.basename(self.fileName)
+        nowTime=datetime.now().strftime("%d-%m-%Y %H-%M-%S.%f'")
+        row = {"FileName": videoName,"Message":message,"Time":nowTime,"Level":"Warning"}
+        return row
 
     def takeFramesFromVideo(self):
         video=self.fileName
-        self.outputFolder='C:/DistractedDriverDetection/Frames/VideoParse/'+os.path.basename(video)
+        videoName = os.path.basename(video)
+        if(videoName in self.dbContext.getCollections()):
+            self.dbContext.mydb[videoName].drop()
+        self.outputFolder='C:/DistractedDriverDetection/Frames/VideoParse/'+videoName
         if not os.path.exists(self.outputFolder):
             os.makedirs(self.outputFolder)
         vidcap = cv2.VideoCapture(video)
@@ -107,8 +122,8 @@ class VideoPlayer(QWidget):
         while vidcap.isOpened():
             success, image = vidcap.read()
             if success:
-                if(count%3==0):
-                    cv2.imwrite(os.path.join(self.outputFolder, '%d.jpg') % (count/3), image)
+                if(count%30==0):
+                    cv2.imwrite(os.path.join(self.outputFolder, '%d.jpg') % (count/30), image)
 
                 count += 1
             else:
@@ -168,3 +183,4 @@ class VideoPlayer(QWidget):
         self.safeDrivingCounter=2
         self.checkImage="C:/DistractedDriverDetection/DistractedDriverDetection/ui/images/check.png"
         self.warningImage="C:/DistractedDriverDetection/DistractedDriverDetection/ui/images/warning.png"
+        self.dbContext = DBContext.DBContext.getInstance()

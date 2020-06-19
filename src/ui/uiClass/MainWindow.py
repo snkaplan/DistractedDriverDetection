@@ -6,6 +6,7 @@ import sys
 scriptpath = "../"
 
 sys.path.append('../')
+import ResultsWindow
 
 import videoWindow
 from classFolder import mainClass
@@ -19,6 +20,7 @@ class Ui_MainWindow(object):
         self.fileName=""
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(400, 300)
+
 
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 409, 21))
@@ -39,6 +41,7 @@ class Ui_MainWindow(object):
         self.actionVideo.triggered.connect(lambda action: self.showDialogForVideo())
         self.actionOld_Result_List = QtWidgets.QAction(MainWindow)
         self.actionOld_Result_List.setObjectName("actionOld_Result_List")
+        self.actionOld_Result_List.triggered.connect(lambda action: self.showOldResults())
         self.menuAnalyze.addAction(self.actionImage)
         self.menuAnalyze.addAction(self.actionVideo)
         self.menubar.addAction(self.menuAnalyze.menuAction())
@@ -70,8 +73,6 @@ class Ui_MainWindow(object):
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
-
-
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
@@ -115,3 +116,12 @@ class Ui_MainWindow(object):
             self.graphicLabel.setPixmap(pixmap)
             self.imageResultLabel.setText(prediction)
     #        pixmap.save
+
+    
+    def showOldResults(self):
+            dialog = QDialog()
+            dialog.ui = ResultsWindow.ResultsWindow()
+            dialog.setWindowTitle("Old Results")
+            dialog.ui.setupUi(dialog)
+            dialog.setAttribute(QtCore.Qt.WA_DeleteOnClose)
+            dialog.exec_()
